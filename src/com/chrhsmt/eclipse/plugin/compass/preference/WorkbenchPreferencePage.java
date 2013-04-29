@@ -17,13 +17,13 @@ import com.chrhsmt.eclipse.plugin.compass.Activator;
 import com.chrhsmt.eclipse.plugin.compass.actions.Compass;
 
 /**
+ * Compass Preference Page.
  * @author chr
  *
  */
 public class WorkbenchPreferencePage extends PreferencePage implements
 		IWorkbenchPreferencePage {
 
-	private IWorkbench workbench;
 	private DirectoryFieldEditor rubyPathEditor;
 //	private DirectoryFieldEditor compassPathEditor;
 	private DirectoryFieldEditor gemPathEditor;
@@ -56,7 +56,6 @@ public class WorkbenchPreferencePage extends PreferencePage implements
 	 */
 	@Override
 	public void init(IWorkbench workbench) {
-		this.workbench = workbench;
 		this.setPreferenceStore(Activator.getDefault().getPreferenceStore());
 	}
 
@@ -126,7 +125,10 @@ public class WorkbenchPreferencePage extends PreferencePage implements
 	
 	@Override
 	protected void performDefaults() {
-		// TODO Auto-generated method stub
-		super.performDefaults();
+		IPreferenceStore store = this.getPreferenceStore();
+		this.rubyPathEditor.setStringValue(store.getDefaultString(Compass.PREF_KEY_RUBY_PATH));
+		this.compassFileEditor.setStringValue(store.getDefaultString(Compass.PREF_KEY_COMPASS_PATH));
+		this.gemPathEditor.setStringValue(store.getDefaultString(Compass.PREF_KEY_GEM_PATH));
+		this.otherPathEditor.setStringValue(store.getDefaultString(Compass.PREF_KEY_OTHER_PATH));
 	}
 }

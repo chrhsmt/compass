@@ -54,5 +54,11 @@
             name="Compass Preference">
       </page>
    </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="com.chrhsmt.eclipse.plugin.compass.preference.PreferenceInitializer">
+      </initializer>
+   </extension>
 
 </plugin>

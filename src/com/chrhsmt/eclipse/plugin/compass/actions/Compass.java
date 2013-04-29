@@ -1,10 +1,7 @@
 package com.chrhsmt.eclipse.plugin.compass.actions;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,22 +14,16 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.debug.core.IStreamListener;
-import org.eclipse.debug.core.Launch;
-import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.debug.core.model.IStreamMonitor;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IPageListener;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 import com.chrhsmt.eclipse.plugin.compass.Activator;
-import com.chrhsmt.eclipse.plugin.compass.console.ConsoleLogger;
 import com.chrhsmt.eclipse.plugin.compass.internal.PluginLogger;
 import com.chrhsmt.eclipse.plugin.compass.process.ThreadProcess;
 
@@ -77,15 +68,9 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 
 		this.root = ResourcesPlugin.getWorkspace().getRoot();
 
-//		MessageDialog.openInformation(
-//		window.getShell(),
-//		"Compass",
-//		"Hello, Eclipse world");
-
 		if (action.isChecked()) {
 			// start
 			PluginLogger.log("start");
-			ConsoleLogger.output("compass", "start");
 			
 			// getCommandPath
 			String path = this.getCommandPathes();
@@ -105,15 +90,6 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 						e.getMessage(),
 						status);
 			}
-
-//			IProject[] projects = root.getProjects();
-//			for (IProject project : projects) {
-//				try {
-//					Map<QualifiedName, String> props = project.getPersistentProperties();
-//				} catch (CoreException e) {
-//					e.printStackTrace();
-//				}
-//			}
 
 		} else {
 			// stop
@@ -173,68 +149,7 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 		env.put("PATH", path);
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 		process = new ThreadProcess(env, store.getString(PREF_KEY_COMPASS_PATH), "watch", projectPath);
-//		this.process.start();
-		
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-					ProcessBuilder builder = new ProcessBuilder(store.getString(PREF_KEY_COMPASS_PATH), "watch", projectPath);
-					builder.redirectErrorStream(true);
-					
-					String pathKey = null;
-					for (String key : builder.environment().keySet()) {
-						if (key.equalsIgnoreCase("path")) {
-							pathKey = key;
-						}
-					}
-					
-					// set path
-					String tmpPath = builder.environment().get(pathKey);
-					String newPath = path + ":" + tmpPath;
-					builder.environment().put(pathKey, newPath);
-					builder.environment().put("GEM_PATH", store.getString(PREF_KEY_GEM_PATH));
-
-					Process process = builder.start();
-					IProcess iProcess = DebugPlugin.newProcess(new Launch(null, ILaunchManager.RUN_MODE, null), process, "");
-					iProcess.getStreamsProxy().getOutputStreamMonitor().addListener(new IStreamListener() {
-						@Override
-						public void streamAppended(String text, IStreamMonitor monitor) {
-							ConsoleLogger.output("compass", text);
-						}
-					});
-
-					process.waitFor();
-					InputStream in = null;
-					InputStreamReader reader = null;
-					BufferedReader br = null;
-					try {
-						in = process.getInputStream();
-						reader = new InputStreamReader(in);
-						br = new BufferedReader(reader);
-						String line;
-						while ((line = br.readLine()) != null) {
-							PluginLogger.log(line);
-						}
-						PluginLogger.log("end");
-					} finally {
-						if (in != null) {
-							in.close();
-						}
-						if (reader != null) {
-							reader.close();
-						}
-						if (br != null) {
-							br.close();
-						}
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
-			}
-		}).start();
+		this.process.start();
 	}
 
 	/**
@@ -254,14 +169,6 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 	 * @see IWorkbenchWindowActionDelegate#selectionChanged
 	 */
 	public void selectionChanged(IAction action, ISelection selection) {
-		PluginLogger.log("change");
-		PluginLogger.log("empty:" + selection.isEmpty());
-		if (selection instanceof IStructuredSelection) {
-			IStructuredSelection stSelection = (IStructuredSelection) selection;
-			if (stSelection.getFirstElement() != null) {
-				PluginLogger.log("firstElement : " + stSelection.getFirstElement().getClass());
-			}
-		}
 	}
 
 	/**
@@ -271,6 +178,7 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 	 */
 	public void dispose() {
 		PluginLogger.log("dispose");
+		this.stopCommand();
 	}
 
 	/**
@@ -281,5 +189,21 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 	public void init(IWorkbenchWindow window) {
 		PluginLogger.log("init");
 		this.window = window;
+		
+		// stop compass process when workbench shutdown.
+		this.window.addPageListener(new IPageListener() {
+			@Override
+			public void pageOpened(IWorkbenchPage page) {
+			}
+			
+			@Override
+			public void pageClosed(IWorkbenchPage page) {
+				stopCommand();
+			}
+			
+			@Override
+			public void pageActivated(IWorkbenchPage page) {
+			}
+		});
 	}
 }

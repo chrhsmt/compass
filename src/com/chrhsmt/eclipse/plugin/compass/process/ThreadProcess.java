@@ -5,22 +5,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.chrhsmt.eclipse.plugin.compass.console.ConsoleLogger;
+import com.chrhsmt.eclipse.plugin.compass.internal.PluginLogger;
 
 /**
+ * Process wrapped in Thread.
  * @author chr
  *
  */
 public class ThreadProcess implements Runnable {
-
-	private static final Logger logger = Logger.getLogger(ThreadProcess.class.getSimpleName());
 
 	private Map<String, String> additionalEnv;
 	private String[] command;
 
 	private Thread thread;
 	private Process process;
+	private boolean isActive = false;
 
 	public ThreadProcess(Map<String, String> env, String...command) {
 		this.additionalEnv = env;
@@ -40,8 +41,10 @@ public class ThreadProcess implements Runnable {
 	 * Stop process.
 	 */
 	public void stop() {
-
-		this.process.destroy();
+		this.isActive = false;
+		if (this.process != null) {
+			this.process.destroy();
+		}
 	}
 
 	/* (non-Javadoc)
@@ -49,6 +52,8 @@ public class ThreadProcess implements Runnable {
 	 */
 	@Override
 	public void run() {
+
+		this.isActive = true;
 
 		ProcessBuilder builder = new ProcessBuilder(this.command);
 		builder.redirectErrorStream(true);
@@ -66,11 +71,9 @@ public class ThreadProcess implements Runnable {
 			}
 			builder.environment().put(key, this.additionalEnv.get(key));
 		}
-		
-		Process process = null;
+
 		try {
-			process = builder.start();
-			process.waitFor();
+			this.process = builder.start();
 
 			InputStream in = null;
 			InputStreamReader reader = null;
@@ -80,10 +83,9 @@ public class ThreadProcess implements Runnable {
 				reader = new InputStreamReader(in);
 				br = new BufferedReader(reader);
 				String line;
-				while ((line = br.readLine()) != null) {
-					logger.info(line);
+				while ((line = br.readLine()) != null && this.isActive) {
+					ConsoleLogger.output("compass", line);
 				}
-				logger.info("end");
 			} finally {
 				if (in != null) {
 					in.close();
@@ -96,8 +98,8 @@ public class ThreadProcess implements Runnable {
 				}
 			}
 
-		} catch (IOException | InterruptedException e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
+		} catch (IOException e) {
+			PluginLogger.log(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 	}
