@@ -1,0 +1,132 @@
+package com.chrhsmt.eclipse.plugin.compass.preference;
+
+import org.eclipse.jface.preference.DirectoryFieldEditor;
+import org.eclipse.jface.preference.FileFieldEditor;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPreferencePage;
+
+import com.chrhsmt.eclipse.plugin.compass.Activator;
+import com.chrhsmt.eclipse.plugin.compass.actions.Compass;
+
+/**
+ * @author chr
+ *
+ */
+public class WorkbenchPreferencePage extends PreferencePage implements
+		IWorkbenchPreferencePage {
+
+	private IWorkbench workbench;
+	private DirectoryFieldEditor rubyPathEditor;
+//	private DirectoryFieldEditor compassPathEditor;
+	private DirectoryFieldEditor gemPathEditor;
+	private FileFieldEditor compassFileEditor;
+	private DirectoryFieldEditor otherPathEditor;
+
+	/**
+	 * 
+	 */
+	public WorkbenchPreferencePage() {
+	}
+
+	/**
+	 * @param title
+	 */
+	public WorkbenchPreferencePage(String title) {
+		super(title);
+	}
+
+	/**
+	 * @param title
+	 * @param image
+	 */
+	public WorkbenchPreferencePage(String title, ImageDescriptor image) {
+		super(title, image);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
+	 */
+	@Override
+	public void init(IWorkbench workbench) {
+		this.workbench = workbench;
+		this.setPreferenceStore(Activator.getDefault().getPreferenceStore());
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.preference.PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
+	 */
+	@Override
+	protected Control createContents(Composite parent) {
+		
+		Composite composite = new Composite(parent, SWT.NONE);
+		GridLayout layout = new GridLayout(3, false);
+		composite.setLayout(layout);
+		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		
+		{
+			rubyPathEditor = new DirectoryFieldEditor("rubyPath", "RUBY PATH", composite);
+			String value = getValue(Compass.PREF_KEY_RUBY_PATH);
+			if (value != null) {
+				rubyPathEditor.setStringValue(value);
+			}
+		}
+		{
+//			compassPathEditor = new DirectoryFieldEditor("compassyPath", "COMPASS PATH", composite);
+			compassFileEditor = new FileFieldEditor("compassPath", "COMPASS PATH", composite);
+			String value = getValue(Compass.PREF_KEY_COMPASS_PATH);
+			if (value != null) {
+//				compassPathEditor.setStringValue(value);
+				compassFileEditor.setStringValue(value);
+			}
+		}
+		{
+			gemPathEditor = new DirectoryFieldEditor("gemPath", "GEM PATH (optional)", composite);
+			String value = getValue(Compass.PREF_KEY_GEM_PATH);
+			if (value != null) {
+				gemPathEditor.setStringValue(value);
+			}
+		}
+		{
+			otherPathEditor = new DirectoryFieldEditor("otherPath", "OTHER PATH (optional)", composite);
+			String value = getValue(Compass.PREF_KEY_OTHER_PATH);
+			if (value != null) {
+				otherPathEditor.setStringValue(value);
+			}
+		}
+		return composite;
+	}
+
+	/**
+	 * get preference value.
+	 * @param name
+	 * @return
+	 */
+	private String getValue(String name) {
+		return this.getPreferenceStore().getString(name);
+	}
+
+	@Override
+	public boolean performOk() {
+		IPreferenceStore store = this.getPreferenceStore();
+		store.setValue(Compass.PREF_KEY_RUBY_PATH, this.rubyPathEditor.getStringValue());
+//		store.setValue(Compass.PREF_KEY_COMPASS_PATH, this.compassPathEditor.getStringValue());
+		store.setValue(Compass.PREF_KEY_COMPASS_PATH, this.compassFileEditor.getStringValue());
+		store.setValue(Compass.PREF_KEY_GEM_PATH, this.gemPathEditor.getStringValue());
+		store.setValue(Compass.PREF_KEY_OTHER_PATH, this.otherPathEditor.getStringValue());
+		return super.performOk();
+	}
+	
+	@Override
+	protected void performDefaults() {
+		// TODO Auto-generated method stub
+		super.performDefaults();
+	}
+}

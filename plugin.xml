@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            label="Compass Action Set"
+            visible="true"
+            id="com.chrhsmt.eclipse.plugin.compass.actionSet">
+         <menu
+               label="Compass"
+               id="compassMenu">
+            <separator
+                  name="compassGroup">
+            </separator>
+         </menu>
+         <action
+               class="com.chrhsmt.eclipse.plugin.compass.actions.Compass"
+               icon="icons/compass_icon.png"
+               id="com.chrhsmt.eclipse.plugin.compass.actions.compass"
+               label="CompassWatch"
+               menubarPath="compassMenu/compassGroup"
+               style="toggle"
+               toolbarPath="compassGroup"
+               tooltip="compass watch">
+	            <!-- @see IResourceActionFilter -->
+<!--	            
+            <enablement>
+            	<or>
+                  <and>
+                     <objectClass name="org.eclipse.core.resources.IFile"/>
+                     <not>
+                        <objectState name="extension" value="java"/>
+                     </not>
+                  </and>
+                  <objectClass
+                        name="org.eclipse.jdt.core.IJavaProject">
+                  </objectClass>
+                  <objectClass
+                        name="org.eclipse.core.resources.IFolder">
+                  </objectClass>
+            	</or>
+            </enablement>
+-->
+         </action>
+      </actionSet>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="com.chrhsmt.eclipse.plugin.compass.preference.WorkbenchPreferencePage"
+            id="compass.page"
+            name="Compass Preference">
+      </page>
+   </extension>
+
+</plugin>
