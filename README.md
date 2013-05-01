@@ -11,4 +11,6 @@ details : [https://github.com/chriseppstein/compass](https://github.com/chrisepp
 
 ### install compass-eclipse-plugin to eclipse
 
-    update site [http://dev.chrhsmt.com/plugin/eclipse/compass/](http://dev.chrhsmt.com/plugin/eclipse/compass/)
+update site [http://dev.chrhsmt.com/plugin/eclipse/compass/](http://dev.chrhsmt.com/plugin/eclipse/compass/)
+
+    menu -> Help -> Install New Software...
