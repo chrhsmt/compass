@@ -10,6 +10,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -70,12 +71,19 @@ public class WorkbenchPreferencePage extends PreferencePage implements
 		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
+		GridData column3 = new GridData(GridData.FILL_HORIZONTAL);
+		column3.horizontalSpan = 3;
+		column3.heightHint = 30;
+
 		{
-			rubyPathEditor = new DirectoryFieldEditor("rubyPath", "RUBY PATH", composite);
+			rubyPathEditor = new DirectoryFieldEditor("rubyPath", "RUBY PATH (optional)", composite);
 			String value = getValue(Compass.PREF_KEY_RUBY_PATH);
 			if (value != null) {
 				rubyPathEditor.setStringValue(value);
 			}
+			Label label = new Label(composite, SWT.LEFT);
+			label.setText("set path to ruby (ex: /usr/bin/)");
+			label.setLayoutData(column3);
 		}
 		{
 //			compassPathEditor = new DirectoryFieldEditor("compassyPath", "COMPASS PATH", composite);
@@ -85,6 +93,9 @@ public class WorkbenchPreferencePage extends PreferencePage implements
 //				compassPathEditor.setStringValue(value);
 				compassFileEditor.setStringValue(value);
 			}
+			Label label = new Label(composite, SWT.LEFT);
+			label.setText("set path to compass executable file (ex: /usr/bin/compass)");
+			label.setLayoutData(column3);
 		}
 		{
 			gemPathEditor = new DirectoryFieldEditor("gemPath", "GEM PATH (optional)", composite);
@@ -92,6 +103,9 @@ public class WorkbenchPreferencePage extends PreferencePage implements
 			if (value != null) {
 				gemPathEditor.setStringValue(value);
 			}
+			Label label = new Label(composite, SWT.LEFT);
+			label.setText("set path to gem home (ex: ~/.gem/ruby/version/)");
+			label.setLayoutData(column3);
 		}
 		{
 			otherPathEditor = new DirectoryFieldEditor("otherPath", "OTHER PATH (optional)", composite);
@@ -99,6 +113,9 @@ public class WorkbenchPreferencePage extends PreferencePage implements
 			if (value != null) {
 				otherPathEditor.setStringValue(value);
 			}
+			Label label = new Label(composite, SWT.LEFT);
+			label.setText("set any other necessary path (ex: ~/.gem/ruby/version/bin)");
+			label.setLayoutData(column3);
 		}
 		return composite;
 	}

@@ -1,4 +1,3 @@
-compass
+# compass eclipse plugin
 =======
 
-compass eclipse plugin
