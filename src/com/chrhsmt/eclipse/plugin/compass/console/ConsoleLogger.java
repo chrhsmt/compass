@@ -1,5 +1,9 @@
 package com.chrhsmt.eclipse.plugin.compass.console;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -31,6 +35,8 @@ public class ConsoleLogger {
 	   {
 		   MessageConsole myConsole = findConsole(consoleName);
 		   MessageConsoleStream out = myConsole.newMessageStream();
+		   out.setFontStyle(SWT.BOLD);
+		   out.setColor(new Color(Display.getCurrent(), new RGB(255,102,51)));
 		   out.println(message);
 
 

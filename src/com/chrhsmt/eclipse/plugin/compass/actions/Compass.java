@@ -24,6 +24,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 import com.chrhsmt.eclipse.plugin.compass.Activator;
+import com.chrhsmt.eclipse.plugin.compass.console.ConsoleLogger;
 import com.chrhsmt.eclipse.plugin.compass.internal.PluginLogger;
 import com.chrhsmt.eclipse.plugin.compass.process.ThreadProcess;
 
@@ -119,10 +120,15 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 			if (project.exists() && project.isOpen()) {
 				IFile file = project.getFile(CONFIG_FILE_NAME);
 				if (!file.exists() || !file.isAccessible()) {
+					ConsoleLogger.output("compass",
+							String.format("Project '%s' does not have config.rb or read it.", project.getName()));
 					continue;
+				} else {
+					ConsoleLogger.output("compass",
+							String.format("Project '%s' found config.rb.", project.getName()));
+					this.targetProjects.add(project);
+//					this.readProperties(file.getLocation().toOSString());
 				}
-				this.targetProjects.add(project);
-//				this.readProperties(file.getLocation().toOSString());
 			} else {
 				continue;
 			}
