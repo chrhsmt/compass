@@ -26,6 +26,7 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import com.chrhsmt.eclipse.plugin.compass.Activator;
 import com.chrhsmt.eclipse.plugin.compass.console.ConsoleLogger;
 import com.chrhsmt.eclipse.plugin.compass.internal.PluginLogger;
+import com.chrhsmt.eclipse.plugin.compass.process.ProcessUtils;
 import com.chrhsmt.eclipse.plugin.compass.process.ThreadProcess;
 
 
@@ -51,7 +52,7 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 	
 	private List<IProject> targetProjects = new ArrayList<IProject>();
 
-	private ThreadProcess process;
+	private List<ThreadProcess> processes = new ArrayList<ThreadProcess>();
 
 	/**
 	 * The constructor.
@@ -70,18 +71,37 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 		this.root = ResourcesPlugin.getWorkspace().getRoot();
 
 		if (action.isChecked()) {
+			
+			this.targetProjects.clear();
+			this.processes.clear();
+
 			// start
 			PluginLogger.log("start");
 			
 			// getCommandPath
 			String path = this.getCommandPathes();
 
+			if (!this.checkCommandExists(path)) {
+				final String message =
+						"compass executable command does not exists. please check your path preference.";
+				IStatus status = new Status(IStatus.WARNING, Activator.PLUGIN_ID, message);
+				ErrorDialog.openError(
+						this.window.getShell(),
+						"command 'compass' runtime error",
+						message,
+						status);
+				return;
+			}
+
 			// check config.rb
-			this.check();
+			this.checkProjects();
 
 			// start
 			try {
-				this.startCommand(path, this.targetProjects.get(0).getLocation().toOSString());
+				for (IProject project : this.targetProjects) {
+					ConsoleLogger.output("compass", String.format("In %s", project.getName()));
+					this.startCommand(path, project.getLocation().toOSString());
+				}
 			} catch (IOException | InterruptedException e) {
 				PluginLogger.log(e.getMessage(), e);
 				IStatus status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage());
@@ -113,9 +133,22 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 	}
 
 	/**
+	 * check command exists.
+	 * @param path
+	 * @return
+	 */
+	private boolean checkCommandExists(String path) {
+		Map<String, String> env = new HashMap<>();
+		env.put("PATH", path);
+		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		return ProcessUtils.exists(store.getString(PREF_KEY_COMPASS_PATH), env);
+	}
+
+	/**
 	 * specify target project.
 	 */
-	private void check() {
+	private void checkProjects() {
+		
 		for (IProject project : this.root.getProjects()) {
 			if (project.exists() && project.isOpen()) {
 				IFile file = project.getFile(CONFIG_FILE_NAME);
@@ -154,17 +187,23 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 		Map<String, String> env = new HashMap<>();
 		env.put("PATH", path);
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-		process = new ThreadProcess(env, store.getString(PREF_KEY_COMPASS_PATH), "watch", projectPath);
-		this.process.start();
+		
+		ThreadProcess process = new ThreadProcess(env, store.getString(PREF_KEY_COMPASS_PATH), "watch", projectPath);
+		process.start();
+		processes.add(process);
 	}
 
 	/**
 	 * stop process.
 	 */
 	private void stopCommand() {
-		if (this.process != null) {
-			this.process.stop();
+		if (this.processes != null && !this.processes.isEmpty()) {
+			for (ThreadProcess process : this.processes) {
+				process.stop();
+			}
+			this.processes.clear();
 		}
+		this.targetProjects.clear();
 	}
 
 	/**
@@ -192,10 +231,67 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 	 * be able to provide parent shell for the message dialog.
 	 * @see IWorkbenchWindowActionDelegate#init
 	 */
+	@SuppressWarnings("restriction")
 	public void init(IWorkbenchWindow window) {
 		PluginLogger.log("init");
 		this.window = window;
-		
+
+//		ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
+////		for (ILaunchConfigurationType type : manager.getLaunchConfigurationTypes()) {
+////			System.out.println(type.getIdentifier() + ":" + type.getName());
+////		}
+//		
+//		try {
+//			IWorkbench workbench = 
+//				    PlatformUI.getWorkbench();
+//				WorkbenchWindow workbenchWindow = 
+//				    (WorkbenchWindow)workbench.
+//				    getActiveWorkbenchWindow();
+//				IActionBars bars = 
+//				    workbenchWindow.getActionBars();
+//				IStatusLineManager 
+//				    lineManager = bars.getStatusLineManager();
+//				IProgressMonitor monitor = 
+//				    lineManager.getProgressMonitor();
+//			ILaunchConfigurationType compasstype = manager.getLaunchConfigurationType("com.chrhsmt.eclipse.plugin.compass.CompassLaunchConfigurationType");
+//			ILaunch launch = compasstype.newInstance(null, Activator.PLUGIN_ID).launch(ILaunchManager.RUN_MODE, monitor);
+//			manager.addLaunch(launch);
+//		} catch (CoreException e2) {
+//			e2.printStackTrace();
+//		}
+//		
+//		WorkbenchJob job = new WorkbenchJob("compass-watch") {
+//			@Override
+//			public IStatus runInUIThread(IProgressMonitor monitor) {
+//				
+//				ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
+//				ILaunchConfigurationType type = manager.getLaunchConfigurationType(IExternalToolConstants.ID_PROGRAM_LAUNCH_CONFIGURATION_TYPE);
+//				String location = "/Users/chr/.rvm/gems/ruby-1.9.3-p392/bin/compass";
+//				try {
+//					ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(null, Activator.PLUGIN_ID);
+//					workingCopy.setAttribute(IExternalToolConstants.ATTR_LOCATION, location);
+//					workingCopy.setAttribute(IExternalToolConstants.ATTR_TOOL_ARGUMENTS, "--help");
+//					workingCopy.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, new HashMap<>());
+//					workingCopy.setAttribute(IExternalToolConstants.ATTR_LAUNCH_IN_BACKGROUND, true);
+//					monitor.beginTask("compass", 100);
+//					ILaunch launch = workingCopy.launch(ILaunchManager.RUN_MODE, new SubProgressMonitor(monitor, 20), false, false);
+//					manager.addLaunch(launch);
+//					monitor.worked(10);
+//					try {
+//						Thread.sleep(3000);
+//					} catch (InterruptedException e) {
+//						e.printStackTrace();
+//					}
+//					return Status.OK_STATUS;
+//				} catch (CoreException e) {
+//					e.printStackTrace();
+//					return e.getStatus();
+//				}
+//				
+//			}
+//		};
+//		job.schedule();
+
 		// stop compass process when workbench shutdown.
 		this.window.addPageListener(new IPageListener() {
 			@Override

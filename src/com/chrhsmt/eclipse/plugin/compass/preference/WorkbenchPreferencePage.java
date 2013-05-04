@@ -114,7 +114,7 @@ public class WorkbenchPreferencePage extends PreferencePage implements
 				otherPathEditor.setStringValue(value);
 			}
 			Label label = new Label(composite, SWT.LEFT);
-			label.setText("set any other necessary path (ex: ~/.gem/ruby/version/bin)");
+			label.setText("set any other necessary path (ex: ~/.gem/ruby/version/bin:~/any/other/path)");
 			label.setLayoutData(column3);
 		}
 		return composite;

@@ -60,5 +60,15 @@
             class="com.chrhsmt.eclipse.plugin.compass.preference.PreferenceInitializer">
       </initializer>
    </extension>
+   <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            category="com.chrhsmt.eclipse.plugin.compass"
+            delegate="com.chrhsmt.eclipse.plugin.compass.CompassLaunchDelegate"
+            id="com.chrhsmt.eclipse.plugin.compass.CompassLaunchConfigurationType"
+            modes="run"
+            name="CompassLaunchConfigurationType">
+      </launchConfigurationType>
+   </extension>
 
 </plugin>

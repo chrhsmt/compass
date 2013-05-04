@@ -58,19 +58,7 @@ public class ThreadProcess implements Runnable {
 		ProcessBuilder builder = new ProcessBuilder(this.command);
 		builder.redirectErrorStream(true);
 		
-		// set path
-		for (String key : this.additionalEnv.keySet()) {
-			
-			for (String envKey : builder.environment().keySet()) {
-				if (envKey.equalsIgnoreCase(key)) {
-					String tmp = builder.environment().get(envKey);
-					tmp += this.additionalEnv.get(key);
-					builder.environment().put(envKey, tmp);
-					continue;
-				}
-			}
-			builder.environment().put(key, this.additionalEnv.get(key));
-		}
+		builder.environment().putAll(ProcessUtils.join(builder.environment(), additionalEnv));
 
 		try {
 			this.process = builder.start();
