@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import org.eclipse.core.resources.IProject;
 
 import com.chrhsmt.eclipse.plugin.compass.internal.PluginLogger;
 
@@ -17,12 +19,55 @@ import com.chrhsmt.eclipse.plugin.compass.internal.PluginLogger;
 public class ProcessUtils {
 
 	/**
-	 * wheather command exists in PATH.
+	 * Get Enviroment setting command.
+	 * @return
+	 */
+	public static String getEnvCommand() {
+		if (ProcessUtils.isWindows()) {
+			return getFullPath("set", null);
+		} else {
+			return getFullPath("env", null);
+		}
+	}
+
+	/**
+	 * Build PATH phrase of setting. 
+	 * @param pathes
+	 * @return
+	 */
+	public static String buildEnviromentPathPhrase(String...pathes) {
+		StringBuilder sb = new StringBuilder("PATH=");
+		for (String path : pathes) {
+			if (path != null && path.length() > 0) {
+				sb.append(path).append(":");
+			}
+		}
+		sb.append("$PATH");
+		return sb.toString();
+	}
+
+	/**
+	 * TODO:
+	 * @param projects
+	 * @return
+	 */
+	public static String buildExecuteCommandPhrase(List<IProject> projects) {
+		StringBuilder sb = new StringBuilder();
+		for (IProject project : projects) {
+			sb.append("compass watch ")
+			  .append(project.getLocation().toOSString())
+			  .append(" ");
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * Get full path of such command.
 	 * @param command
 	 * @param env
 	 * @return
 	 */
-	public static boolean exists(String command, Map<String, String> env) {
+	public static String getFullPath(String command, Map<String, String> env) {
 		ProcessBuilder builder = new ProcessBuilder(getWhichCommand(command));
 		if (env != null) {
 			builder.environment().putAll(ProcessUtils.join(builder.environment(), env));
@@ -39,11 +84,7 @@ public class ProcessUtils {
 				in = process.getInputStream();
 				inReader = new InputStreamReader(in);
 				reader = new BufferedReader(inReader);
-				String line = null;
-				while ((line = reader.readLine()) != null) {
-					PluginLogger.log(line);
-				}
-				return ret;
+				return ret ? reader.readLine() : null;
 			} finally {
 				if (in != null) {
 					in.close();
@@ -114,10 +155,6 @@ public class ProcessUtils {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		
-		
-		Map<String, String> map = new HashMap<>();
-		map.put("PATH", args[1]);
-		System.out.println(exists(args[0], map));
+		System.out.println(getEnvCommand());
 	}
 }
