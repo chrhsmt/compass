@@ -8,7 +8,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.preference.IPreferenceStore;
 
+import com.chrhsmt.eclipse.plugin.compass.Activator;
+import com.chrhsmt.eclipse.plugin.compass.actions.Compass;
 import com.chrhsmt.eclipse.plugin.compass.internal.PluginLogger;
 
 /**
@@ -17,16 +20,60 @@ import com.chrhsmt.eclipse.plugin.compass.internal.PluginLogger;
  *
  */
 public class ProcessUtils {
+	
+	/**
+	 * Get execute command.
+	 * @return
+	 */
+	public static String getExecuteCommand() {
+		if (isWindows()) {
+			return getFullPath("cmd", null);
+		} else {
+			return getFullPath("sh", null);
+		}
+	}
+
+	/**
+	 * Get command arguments.
+	 * @param targetProjects
+	 * @param pathes
+	 * @return
+	 */
+	public static String getArguments(List<IProject> targetProjects, String...pathes) {
+		String pathPhrase = buildEnviromentPathPhrase(pathes);
+		StringBuilder sb = new StringBuilder()
+		.append(getExecuteCommandOption())
+		.append(" \"")
+		.append(getEnvCommand())
+		.append(" ")
+		.append(pathPhrase)
+		.append("; ")
+		.append(buildExecuteCommandPhrase(targetProjects))
+		.append("\"");
+		return sb.toString();
+	}
+
+	/**
+	 * Get execute command option.
+	 * @return
+	 */
+	private static String getExecuteCommandOption() {
+		if (isWindows()) {
+			return "/c";
+		} else {
+			return "-c";
+		}
+	}
 
 	/**
 	 * Get Enviroment setting command.
 	 * @return
 	 */
-	public static String getEnvCommand() {
+	private static String getEnvCommand() {
 		if (ProcessUtils.isWindows()) {
 			return getFullPath("set", null);
 		} else {
-			return getFullPath("env", null);
+			return "export";
 		}
 	}
 
@@ -35,7 +82,7 @@ public class ProcessUtils {
 	 * @param pathes
 	 * @return
 	 */
-	public static String buildEnviromentPathPhrase(String...pathes) {
+	private static String buildEnviromentPathPhrase(String...pathes) {
 		StringBuilder sb = new StringBuilder("PATH=");
 		for (String path : pathes) {
 			if (path != null && path.length() > 0) {
@@ -51,10 +98,16 @@ public class ProcessUtils {
 	 * @param projects
 	 * @return
 	 */
-	public static String buildExecuteCommandPhrase(List<IProject> projects) {
+	private static String buildExecuteCommandPhrase(List<IProject> projects) {
+		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		String command = store.getString(Compass.PREF_KEY_COMPASS_PATH);
+		if (command == null || command.length() <= 0) {
+			command = "compass";
+		}
 		StringBuilder sb = new StringBuilder();
 		for (IProject project : projects) {
-			sb.append("compass watch ")
+			sb.append(command)
+			  .append(" watch ")
 			  .append(project.getLocation().toOSString())
 			  .append(" ");
 		}
@@ -153,6 +206,7 @@ public class ProcessUtils {
 	/**
 	 * for debug
 	 * @param args
+	 * @deprecated debug only. not to use for production.
 	 */
 	public static void main(String[] args) {
 		System.out.println(getEnvCommand());

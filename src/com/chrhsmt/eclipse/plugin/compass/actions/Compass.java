@@ -166,6 +166,9 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 	private void stopCommand() {
 		if (this.launch != null) {
 			try {
+//				for (IProcess process : this.launch.getProcesses()) {
+//					process.terminate();
+//				}
 				this.launch.terminate();
 			} catch (DebugException e) {
 				Activator.getDefault().getLog().log(e.getStatus());
@@ -271,29 +274,23 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 
 		private ILaunchConfiguration createConfig() throws CoreException {
 
-			ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
-			ILaunchConfigurationType type = manager.getLaunchConfigurationType(IExternalToolConstants.ID_PROGRAM_LAUNCH_CONFIGURATION_TYPE);
-			String location = ProcessUtils.getEnvCommand();
-
-			ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(null, Activator.PLUGIN_ID);
-			workingCopy.setAttribute(IExternalToolConstants.ATTR_LOCATION, location);
-			workingCopy.setAttribute(IExternalToolConstants.ATTR_TOOL_ARGUMENTS, getArguments());
-			workingCopy.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, new HashMap<>());
-			workingCopy.setAttribute(IExternalToolConstants.ATTR_LAUNCH_IN_BACKGROUND, true);
-			return workingCopy;
-		}
-
-		private String getArguments() {
 			IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-			String pathPhrase = ProcessUtils.buildEnviromentPathPhrase(
+			String arguments = ProcessUtils.getArguments(
+					targetProjects,
 					store.getString(PREF_KEY_RUBY_PATH) != null ? store.getString(PREF_KEY_RUBY_PATH) : null,
 					store.getString(PREF_KEY_GEM_PATH) != null ? store.getString(PREF_KEY_GEM_PATH) : null,
 					store.getString(PREF_KEY_OTHER_PATH) != null ? store.getString(PREF_KEY_OTHER_PATH) : null);
-			StringBuilder sb = new StringBuilder()
-			.append(pathPhrase)
-			.append("; ")
-			.append(ProcessUtils.buildExecuteCommandPhrase(targetProjects));
-			return sb.toString();
+
+			ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
+			ILaunchConfigurationType type = manager.getLaunchConfigurationType(IExternalToolConstants.ID_PROGRAM_LAUNCH_CONFIGURATION_TYPE);
+			String location = ProcessUtils.getExecuteCommand();
+
+			ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(null, Activator.PLUGIN_ID);
+			workingCopy.setAttribute(IExternalToolConstants.ATTR_LOCATION, location);
+			workingCopy.setAttribute(IExternalToolConstants.ATTR_TOOL_ARGUMENTS, arguments);
+			workingCopy.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, new HashMap<>());
+			workingCopy.setAttribute(IExternalToolConstants.ATTR_LAUNCH_IN_BACKGROUND, true);
+			return workingCopy;
 		}
 	}
 }
