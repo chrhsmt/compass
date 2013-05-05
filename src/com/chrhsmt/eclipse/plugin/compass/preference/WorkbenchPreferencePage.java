@@ -15,7 +15,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import com.chrhsmt.eclipse.plugin.compass.Activator;
-import com.chrhsmt.eclipse.plugin.compass.actions.Compass;
 
 /**
  * Compass Preference Page.
@@ -77,7 +76,7 @@ public class WorkbenchPreferencePage extends PreferencePage implements
 
 		{
 			rubyPathEditor = new DirectoryFieldEditor("rubyPath", "RUBY PATH (optional)", composite);
-			String value = getValue(Compass.PREF_KEY_RUBY_PATH);
+			String value = getValue(CompassPreferenceStore.PREF_KEY_RUBY_PATH);
 			if (value != null) {
 				rubyPathEditor.setStringValue(value);
 			}
@@ -88,7 +87,7 @@ public class WorkbenchPreferencePage extends PreferencePage implements
 		{
 //			compassPathEditor = new DirectoryFieldEditor("compassyPath", "COMPASS PATH", composite);
 			compassFileEditor = new FileFieldEditor("compassPath", "COMPASS PATH", composite);
-			String value = getValue(Compass.PREF_KEY_COMPASS_PATH);
+			String value = getValue(CompassPreferenceStore.PREF_KEY_COMPASS_PATH);
 			if (value != null) {
 //				compassPathEditor.setStringValue(value);
 				compassFileEditor.setStringValue(value);
@@ -99,7 +98,7 @@ public class WorkbenchPreferencePage extends PreferencePage implements
 		}
 		{
 			gemPathEditor = new DirectoryFieldEditor("gemPath", "GEM PATH (optional)", composite);
-			String value = getValue(Compass.PREF_KEY_GEM_PATH);
+			String value = getValue(CompassPreferenceStore.PREF_KEY_GEM_PATH);
 			if (value != null) {
 				gemPathEditor.setStringValue(value);
 			}
@@ -109,7 +108,7 @@ public class WorkbenchPreferencePage extends PreferencePage implements
 		}
 		{
 			otherPathEditor = new DirectoryFieldEditor("otherPath", "OTHER PATH (optional)", composite);
-			String value = getValue(Compass.PREF_KEY_OTHER_PATH);
+			String value = getValue(CompassPreferenceStore.PREF_KEY_OTHER_PATH);
 			if (value != null) {
 				otherPathEditor.setStringValue(value);
 			}
@@ -132,20 +131,20 @@ public class WorkbenchPreferencePage extends PreferencePage implements
 	@Override
 	public boolean performOk() {
 		IPreferenceStore store = this.getPreferenceStore();
-		store.setValue(Compass.PREF_KEY_RUBY_PATH, this.rubyPathEditor.getStringValue());
+		store.setValue(CompassPreferenceStore.PREF_KEY_RUBY_PATH, this.rubyPathEditor.getStringValue());
 //		store.setValue(Compass.PREF_KEY_COMPASS_PATH, this.compassPathEditor.getStringValue());
-		store.setValue(Compass.PREF_KEY_COMPASS_PATH, this.compassFileEditor.getStringValue());
-		store.setValue(Compass.PREF_KEY_GEM_PATH, this.gemPathEditor.getStringValue());
-		store.setValue(Compass.PREF_KEY_OTHER_PATH, this.otherPathEditor.getStringValue());
+		store.setValue(CompassPreferenceStore.PREF_KEY_COMPASS_PATH, this.compassFileEditor.getStringValue());
+		store.setValue(CompassPreferenceStore.PREF_KEY_GEM_PATH, this.gemPathEditor.getStringValue());
+		store.setValue(CompassPreferenceStore.PREF_KEY_OTHER_PATH, this.otherPathEditor.getStringValue());
 		return super.performOk();
 	}
 	
 	@Override
 	protected void performDefaults() {
 		IPreferenceStore store = this.getPreferenceStore();
-		this.rubyPathEditor.setStringValue(store.getDefaultString(Compass.PREF_KEY_RUBY_PATH));
-		this.compassFileEditor.setStringValue(store.getDefaultString(Compass.PREF_KEY_COMPASS_PATH));
-		this.gemPathEditor.setStringValue(store.getDefaultString(Compass.PREF_KEY_GEM_PATH));
-		this.otherPathEditor.setStringValue(store.getDefaultString(Compass.PREF_KEY_OTHER_PATH));
+		this.rubyPathEditor.setStringValue(store.getDefaultString(CompassPreferenceStore.PREF_KEY_RUBY_PATH));
+		this.compassFileEditor.setStringValue(store.getDefaultString(CompassPreferenceStore.PREF_KEY_COMPASS_PATH));
+		this.gemPathEditor.setStringValue(store.getDefaultString(CompassPreferenceStore.PREF_KEY_GEM_PATH));
+		this.otherPathEditor.setStringValue(store.getDefaultString(CompassPreferenceStore.PREF_KEY_OTHER_PATH));
 	}
 }

@@ -8,11 +8,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.osgi.service.environment.Constants;
 
 import com.chrhsmt.eclipse.plugin.compass.Activator;
-import com.chrhsmt.eclipse.plugin.compass.actions.Compass;
 import com.chrhsmt.eclipse.plugin.compass.internal.PluginLogger;
+import com.chrhsmt.eclipse.plugin.compass.preference.CompassPreferenceStore;
 
 /**
  * Process utility.
@@ -39,15 +41,15 @@ public class ProcessUtils {
 	 * @param pathes
 	 * @return
 	 */
-	public static String getArguments(List<IProject> targetProjects, String...pathes) {
-		String pathPhrase = buildEnviromentPathPhrase(pathes);
+	public static String getArguments(List<IProject> targetProjects/*, String...pathes*/) {
+//		String pathPhrase = buildEnviromentPathPhrase(pathes);
 		StringBuilder sb = new StringBuilder()
 		.append(getExecuteCommandOption())
 		.append(" \"")
-		.append(getEnvCommand())
-		.append(" ")
-		.append(pathPhrase)
-		.append("; ")
+//		.append(getEnvCommand())
+//		.append(" ")
+//		.append(pathPhrase)
+//		.append("; ")
 		.append(buildExecuteCommandPhrase(targetProjects))
 		.append("\"");
 		return sb.toString();
@@ -100,7 +102,7 @@ public class ProcessUtils {
 	 */
 	private static String buildExecuteCommandPhrase(List<IProject> projects) {
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-		String command = store.getString(Compass.PREF_KEY_COMPASS_PATH);
+		String command = store.getString(CompassPreferenceStore.PREF_KEY_COMPASS_PATH);
 		if (command == null || command.length() <= 0) {
 			command = "compass";
 		}
@@ -178,8 +180,7 @@ public class ProcessUtils {
 	 * @return
 	 */
 	public static final boolean isWindows() {
-		String os = System.getProperty("os.name");
-		return os.toLowerCase().contains("windows");
+		return Platform.getOS().equals(Constants.OS_WIN32);
 	}
 
 	/**

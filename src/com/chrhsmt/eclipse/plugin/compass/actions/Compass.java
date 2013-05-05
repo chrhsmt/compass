@@ -1,7 +1,6 @@
 package com.chrhsmt.eclipse.plugin.compass.actions;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.externaltools.internal.IExternalToolConstants;
@@ -24,7 +23,6 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IPageListener;
 import org.eclipse.ui.IWorkbenchPage;
@@ -34,6 +32,7 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import com.chrhsmt.eclipse.plugin.compass.Activator;
 import com.chrhsmt.eclipse.plugin.compass.console.ConsoleLogger;
 import com.chrhsmt.eclipse.plugin.compass.internal.PluginLogger;
+import com.chrhsmt.eclipse.plugin.compass.preference.CompassPreferenceStore;
 import com.chrhsmt.eclipse.plugin.compass.process.ProcessUtils;
 
 
@@ -49,11 +48,6 @@ import com.chrhsmt.eclipse.plugin.compass.process.ProcessUtils;
 public class Compass implements IWorkbenchWindowActionDelegate {
 
 	private static final String CONFIG_FILE_NAME = "config.rb";
-
-	public static final String PREF_KEY_RUBY_PATH = "RUBY_PATH";
-	public static final String PREF_KEY_GEM_PATH = "GEM_PATH";
-	public static final String PREF_KEY_COMPASS_PATH = "COMPASS_PATH";
-	public static final String PREF_KEY_OTHER_PATH = "OTHER_PATH";
 
 	private IWorkbenchWindow window;
 	private IWorkspaceRoot root;
@@ -152,7 +146,6 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 					ConsoleLogger.output("compass",
 							String.format("Project '%s' found config.rb.", project.getName()));
 					this.targetProjects.add(project);
-//					this.readProperties(file.getLocation().toOSString());
 				}
 			} else {
 				continue;
@@ -166,9 +159,6 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 	private void stopCommand() {
 		if (this.launch != null) {
 			try {
-//				for (IProcess process : this.launch.getProcesses()) {
-//					process.terminate();
-//				}
 				this.launch.terminate();
 			} catch (DebugException e) {
 				Activator.getDefault().getLog().log(e.getStatus());
@@ -274,12 +264,13 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 
 		private ILaunchConfiguration createConfig() throws CoreException {
 
-			IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+//			IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 			String arguments = ProcessUtils.getArguments(
-					targetProjects,
+					targetProjects
+					/*,
 					store.getString(PREF_KEY_RUBY_PATH) != null ? store.getString(PREF_KEY_RUBY_PATH) : null,
 					store.getString(PREF_KEY_GEM_PATH) != null ? store.getString(PREF_KEY_GEM_PATH) : null,
-					store.getString(PREF_KEY_OTHER_PATH) != null ? store.getString(PREF_KEY_OTHER_PATH) : null);
+					store.getString(PREF_KEY_OTHER_PATH) != null ? store.getString(PREF_KEY_OTHER_PATH) : null*/);
 
 			ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
 			ILaunchConfigurationType type = manager.getLaunchConfigurationType(IExternalToolConstants.ID_PROGRAM_LAUNCH_CONFIGURATION_TYPE);
@@ -288,9 +279,11 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 			ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(null, Activator.PLUGIN_ID);
 			workingCopy.setAttribute(IExternalToolConstants.ATTR_LOCATION, location);
 			workingCopy.setAttribute(IExternalToolConstants.ATTR_TOOL_ARGUMENTS, arguments);
-			workingCopy.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, new HashMap<>());
+			workingCopy.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, CompassPreferenceStore.getPathMap());
 			workingCopy.setAttribute(IExternalToolConstants.ATTR_LAUNCH_IN_BACKGROUND, true);
 			return workingCopy;
 		}
+		
+
 	}
 }
