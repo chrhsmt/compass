@@ -221,7 +221,7 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 	}
 
 	/**
-	 * 
+	 * Compass Job.
 	 * @author chihiro
 	 *
 	 */
