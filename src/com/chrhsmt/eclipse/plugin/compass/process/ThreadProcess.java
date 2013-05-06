@@ -12,6 +12,7 @@ import com.chrhsmt.eclipse.plugin.compass.internal.PluginLogger;
 /**
  * Process wrapped in Thread.
  * @author chr
+ * @deprecated
  *
  */
 public class ThreadProcess implements Runnable {

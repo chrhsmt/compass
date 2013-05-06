@@ -4,10 +4,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.osgi.service.environment.Constants;
+
+import com.chrhsmt.eclipse.plugin.compass.Activator;
 import com.chrhsmt.eclipse.plugin.compass.internal.PluginLogger;
+import com.chrhsmt.eclipse.plugin.compass.preference.CompassPreferenceStore;
 
 /**
  * Process utility.
@@ -15,17 +22,89 @@ import com.chrhsmt.eclipse.plugin.compass.internal.PluginLogger;
  *
  */
 public class ProcessUtils {
+	
+	/**
+	 * Get execute command.
+	 * @return
+	 */
+	public static String getExecuteCommand() {
+		if (isWindows()) {
+			return getFullPath("cmd", null);
+		} else {
+			return getFullPath("sh", null);
+		}
+	}
 
 	/**
-	 * wheather command exists in PATH.
+	 * Get command arguments.
+	 * @param targetProjects
+	 * @param pathes
+	 * @return
+	 */
+	public static String getArguments(List<IProject> targetProjects) {
+		StringBuilder sb = new StringBuilder()
+		.append(getExecuteCommandOption())
+		.append(" \"")
+		.append(buildExecuteCommandPhrase(targetProjects))
+		.append("\"");
+		return sb.toString();
+	}
+
+	/**
+	 * Get execute command option.
+	 * @return
+	 */
+	private static String getExecuteCommandOption() {
+		if (isWindows()) {
+			return "/c";
+		} else {
+			return "-c";
+		}
+	}
+
+	/**
+	 * Get Enviroment setting command.
+	 * @return
+	 */
+	private static String getEnvCommand() {
+		if (ProcessUtils.isWindows()) {
+			return getFullPath("set", null);
+		} else {
+			return "export";
+		}
+	}
+
+	/**
+	 * TODO:
+	 * @param projects
+	 * @return
+	 */
+	private static String buildExecuteCommandPhrase(List<IProject> projects) {
+		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		String command = store.getString(CompassPreferenceStore.PREF_KEY_COMPASS_PATH);
+		if (command == null || command.length() <= 0) {
+			command = "compass";
+		}
+		StringBuilder sb = new StringBuilder();
+		for (IProject project : projects) {
+			sb.append(command)
+			  .append(" watch ")
+			  .append(project.getLocation().toOSString())
+			  .append(" ");
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * Get full path of such command.
 	 * @param command
 	 * @param env
 	 * @return
 	 */
-	public static boolean exists(String command, Map<String, String> env) {
+	public static String getFullPath(String command, Map<String, String> env) {
 		ProcessBuilder builder = new ProcessBuilder(getWhichCommand(command));
 		if (env != null) {
-			builder.environment().putAll(ProcessUtils.join(builder.environment(), env));
+			builder.environment().putAll(join(builder.environment(), env));
 		}
 		builder.redirectErrorStream(true);
 
@@ -39,11 +118,7 @@ public class ProcessUtils {
 				in = process.getInputStream();
 				inReader = new InputStreamReader(in);
 				reader = new BufferedReader(inReader);
-				String line = null;
-				while ((line = reader.readLine()) != null) {
-					PluginLogger.log(line);
-				}
-				return ret;
+				return ret ? reader.readLine() : null;
 			} finally {
 				if (in != null) {
 					in.close();
@@ -84,8 +159,7 @@ public class ProcessUtils {
 	 * @return
 	 */
 	public static final boolean isWindows() {
-		String os = System.getProperty("os.name");
-		return os.toLowerCase().contains("windows");
+		return Platform.getOS().equals(Constants.OS_WIN32);
 	}
 
 	/**
@@ -112,12 +186,9 @@ public class ProcessUtils {
 	/**
 	 * for debug
 	 * @param args
+	 * @deprecated debug only. not to use for production.
 	 */
 	public static void main(String[] args) {
-		
-		
-		Map<String, String> map = new HashMap<>();
-		map.put("PATH", args[1]);
-		System.out.println(exists(args[0], map));
+		System.out.println(getEnvCommand());
 	}
 }
