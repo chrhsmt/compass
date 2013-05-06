@@ -41,15 +41,10 @@ public class ProcessUtils {
 	 * @param pathes
 	 * @return
 	 */
-	public static String getArguments(List<IProject> targetProjects/*, String...pathes*/) {
-//		String pathPhrase = buildEnviromentPathPhrase(pathes);
+	public static String getArguments(List<IProject> targetProjects) {
 		StringBuilder sb = new StringBuilder()
 		.append(getExecuteCommandOption())
 		.append(" \"")
-//		.append(getEnvCommand())
-//		.append(" ")
-//		.append(pathPhrase)
-//		.append("; ")
 		.append(buildExecuteCommandPhrase(targetProjects))
 		.append("\"");
 		return sb.toString();
@@ -77,22 +72,6 @@ public class ProcessUtils {
 		} else {
 			return "export";
 		}
-	}
-
-	/**
-	 * Build PATH phrase of setting. 
-	 * @param pathes
-	 * @return
-	 */
-	private static String buildEnviromentPathPhrase(String...pathes) {
-		StringBuilder sb = new StringBuilder("PATH=");
-		for (String path : pathes) {
-			if (path != null && path.length() > 0) {
-				sb.append(path).append(":");
-			}
-		}
-		sb.append("$PATH");
-		return sb.toString();
 	}
 
 	/**
@@ -125,7 +104,7 @@ public class ProcessUtils {
 	public static String getFullPath(String command, Map<String, String> env) {
 		ProcessBuilder builder = new ProcessBuilder(getWhichCommand(command));
 		if (env != null) {
-			builder.environment().putAll(ProcessUtils.join(builder.environment(), env));
+			builder.environment().putAll(join(builder.environment(), env));
 		}
 		builder.redirectErrorStream(true);
 

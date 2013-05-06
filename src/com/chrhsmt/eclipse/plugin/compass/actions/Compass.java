@@ -88,42 +88,6 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 				job.schedule();
 			}
 
-//			try {
-//				IWorkbench workbench = 
-//					    PlatformUI.getWorkbench();
-//					WorkbenchWindow workbenchWindow = 
-//					    (WorkbenchWindow)workbench.
-//					    getActiveWorkbenchWindow();
-//					IActionBars bars = 
-//					    workbenchWindow.getActionBars();
-//					IStatusLineManager 
-//					    lineManager = bars.getStatusLineManager();
-//					IProgressMonitor monitor = 
-//					    lineManager.getProgressMonitor();
-//				ILaunchConfigurationType compasstype = manager.getLaunchConfigurationType("com.chrhsmt.eclipse.plugin.compass.CompassLaunchConfigurationType");
-//				ILaunch launch = compasstype.newInstance(null, Activator.PLUGIN_ID).launch(ILaunchManager.RUN_MODE, monitor);
-//				manager.addLaunch(launch);
-//			} catch (CoreException e2) {
-//				e2.printStackTrace();
-//			}
-//
-
-//			// start
-//			try {
-//				for (IProject project : this.targetProjects) {
-//					ConsoleLogger.output("compass", String.format("In %s", project.getName()));
-//					this.startCommand(path, project.getLocation().toOSString());
-//				}
-//			} catch (IOException | InterruptedException e) {
-//				PluginLogger.log(e.getMessage(), e);
-//				IStatus status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage());
-//				ErrorDialog.openError(
-//						this.window.getShell(),
-//						"command 'compass' runtime error",
-//						e.getMessage(),
-//						status);
-//			}
-
 		} else {
 			// stop
 			this.stopCommand();
@@ -232,11 +196,16 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 			PluginLogger.log("========= start =========");
 			
 			try {
-				ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
 				ILaunchConfiguration config = this.createConfig();
 				launch = config.launch(ILaunchManager.RUN_MODE, null, false, true);
-				
-				manager.addLaunch(launch);
+
+//			try {
+//				ILaunchConfigurationType compasstype = manager.getLaunchConfigurationType("com.chrhsmt.eclipse.plugin.compass.CompassLaunchConfigurationType");
+//				ILaunch launch = compasstype.newInstance(null, Activator.PLUGIN_ID).launch(ILaunchManager.RUN_MODE, null);
+//				manager.addLaunch(launch);
+//			} catch (CoreException e2) {
+//				e2.printStackTrace();
+//			}
 
 				while (!launch.isTerminated()) {
 					try {
@@ -262,16 +231,14 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 			}
 		}
 
+		/**
+		 * Create ILauch Configuration.
+		 * @return
+		 * @throws CoreException
+		 */
 		private ILaunchConfiguration createConfig() throws CoreException {
 
-//			IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-			String arguments = ProcessUtils.getArguments(
-					targetProjects
-					/*,
-					store.getString(PREF_KEY_RUBY_PATH) != null ? store.getString(PREF_KEY_RUBY_PATH) : null,
-					store.getString(PREF_KEY_GEM_PATH) != null ? store.getString(PREF_KEY_GEM_PATH) : null,
-					store.getString(PREF_KEY_OTHER_PATH) != null ? store.getString(PREF_KEY_OTHER_PATH) : null*/);
-
+			String arguments = ProcessUtils.getArguments(targetProjects);
 			ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
 			ILaunchConfigurationType type = manager.getLaunchConfigurationType(IExternalToolConstants.ID_PROGRAM_LAUNCH_CONFIGURATION_TYPE);
 			String location = ProcessUtils.getExecuteCommand();
@@ -283,7 +250,5 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 			workingCopy.setAttribute(IExternalToolConstants.ATTR_LAUNCH_IN_BACKGROUND, true);
 			return workingCopy;
 		}
-		
-
 	}
 }
