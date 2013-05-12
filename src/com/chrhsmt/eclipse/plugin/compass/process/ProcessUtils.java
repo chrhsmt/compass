@@ -9,10 +9,8 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.osgi.service.environment.Constants;
 
-import com.chrhsmt.eclipse.plugin.compass.Activator;
 import com.chrhsmt.eclipse.plugin.compass.internal.PluginLogger;
 import com.chrhsmt.eclipse.plugin.compass.preference.CompassPreferenceStore;
 
@@ -80,8 +78,7 @@ public class ProcessUtils {
 	 * @return
 	 */
 	private static String buildExecuteCommandPhrase(List<IProject> projects) {
-		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-		String command = store.getString(CompassPreferenceStore.PREF_KEY_COMPASS_PATH);
+		String command = CompassPreferenceStore.getCompassCommand();
 		if (command == null || command.length() <= 0) {
 			command = "compass";
 		}
@@ -90,7 +87,7 @@ public class ProcessUtils {
 			sb.append(command)
 			  .append(" watch ")
 			  .append(project.getLocation().toOSString())
-			  .append(" ");
+			  .append(" ; ");
 		}
 		return sb.toString();
 	}
