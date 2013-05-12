@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Compass
 Bundle-SymbolicName: com.chrhsmt.eclipse.plugin.compass; singleton:=true
-Bundle-Version: 0.0.1.qualifier
+Bundle-Version: 0.1.0.qualifier
 Bundle-Activator: com.chrhsmt.eclipse.plugin.compass.Activator
 Bundle-Vendor: chrhsmt.com
 Require-Bundle: org.eclipse.ui,

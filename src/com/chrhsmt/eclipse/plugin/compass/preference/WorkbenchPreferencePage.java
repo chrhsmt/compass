@@ -25,7 +25,6 @@ public class WorkbenchPreferencePage extends PreferencePage implements
 		IWorkbenchPreferencePage {
 
 	private DirectoryFieldEditor rubyPathEditor;
-//	private DirectoryFieldEditor compassPathEditor;
 	private DirectoryFieldEditor gemPathEditor;
 	private FileFieldEditor compassFileEditor;
 	private DirectoryFieldEditor otherPathEditor;
@@ -76,7 +75,7 @@ public class WorkbenchPreferencePage extends PreferencePage implements
 
 		{
 			rubyPathEditor = new DirectoryFieldEditor("rubyPath", "RUBY PATH (optional)", composite);
-			String value = getValue(CompassPreferenceStore.PREF_KEY_RUBY_PATH);
+			String value = CompassPreferenceStore.getRubyPath();
 			if (value != null) {
 				rubyPathEditor.setStringValue(value);
 			}
@@ -85,11 +84,9 @@ public class WorkbenchPreferencePage extends PreferencePage implements
 			label.setLayoutData(column3);
 		}
 		{
-//			compassPathEditor = new DirectoryFieldEditor("compassyPath", "COMPASS PATH", composite);
 			compassFileEditor = new FileFieldEditor("compassPath", "COMPASS PATH", composite);
-			String value = getValue(CompassPreferenceStore.PREF_KEY_COMPASS_PATH);
+			String value = CompassPreferenceStore.getCompassPath();
 			if (value != null) {
-//				compassPathEditor.setStringValue(value);
 				compassFileEditor.setStringValue(value);
 			}
 			Label label = new Label(composite, SWT.LEFT);
@@ -97,18 +94,18 @@ public class WorkbenchPreferencePage extends PreferencePage implements
 			label.setLayoutData(column3);
 		}
 		{
-			gemPathEditor = new DirectoryFieldEditor("gemPath", "GEM PATH (optional)", composite);
-			String value = getValue(CompassPreferenceStore.PREF_KEY_GEM_PATH);
+			gemPathEditor = new DirectoryFieldEditor("gemPath", "GEM BIN PATH (optional)", composite);
+			String value = CompassPreferenceStore.getGemBinPath();
 			if (value != null) {
 				gemPathEditor.setStringValue(value);
 			}
 			Label label = new Label(composite, SWT.LEFT);
-			label.setText("set path to gem home (ex: ~/.gem/ruby/version/)");
+			label.setText("set path to gem home (ex: ~/.gem/ruby/version/bin)");
 			label.setLayoutData(column3);
 		}
 		{
 			otherPathEditor = new DirectoryFieldEditor("otherPath", "OTHER PATH (optional)", composite);
-			String value = getValue(CompassPreferenceStore.PREF_KEY_OTHER_PATH);
+			String value = CompassPreferenceStore.getOtherPath();
 			if (value != null) {
 				otherPathEditor.setStringValue(value);
 			}
@@ -119,23 +116,12 @@ public class WorkbenchPreferencePage extends PreferencePage implements
 		return composite;
 	}
 
-	/**
-	 * get preference value.
-	 * @param name
-	 * @return
-	 */
-	private String getValue(String name) {
-		return this.getPreferenceStore().getString(name);
-	}
-
 	@Override
 	public boolean performOk() {
-		IPreferenceStore store = this.getPreferenceStore();
-		store.setValue(CompassPreferenceStore.PREF_KEY_RUBY_PATH, this.rubyPathEditor.getStringValue());
-//		store.setValue(Compass.PREF_KEY_COMPASS_PATH, this.compassPathEditor.getStringValue());
-		store.setValue(CompassPreferenceStore.PREF_KEY_COMPASS_PATH, this.compassFileEditor.getStringValue());
-		store.setValue(CompassPreferenceStore.PREF_KEY_GEM_PATH, this.gemPathEditor.getStringValue());
-		store.setValue(CompassPreferenceStore.PREF_KEY_OTHER_PATH, this.otherPathEditor.getStringValue());
+		CompassPreferenceStore.setRubyPath(this.rubyPathEditor.getStringValue());
+		CompassPreferenceStore.setCompassPath(this.compassFileEditor.getStringValue());
+		CompassPreferenceStore.setGemBinPath(this.gemPathEditor.getStringValue());
+		CompassPreferenceStore.setOtherPath(this.otherPathEditor.getStringValue());
 		return super.performOk();
 	}
 	
@@ -144,7 +130,7 @@ public class WorkbenchPreferencePage extends PreferencePage implements
 		IPreferenceStore store = this.getPreferenceStore();
 		this.rubyPathEditor.setStringValue(store.getDefaultString(CompassPreferenceStore.PREF_KEY_RUBY_PATH));
 		this.compassFileEditor.setStringValue(store.getDefaultString(CompassPreferenceStore.PREF_KEY_COMPASS_PATH));
-		this.gemPathEditor.setStringValue(store.getDefaultString(CompassPreferenceStore.PREF_KEY_GEM_PATH));
+		this.gemPathEditor.setStringValue(store.getDefaultString(CompassPreferenceStore.PREF_KEY_GEM_BIN_PATH));
 		this.otherPathEditor.setStringValue(store.getDefaultString(CompassPreferenceStore.PREF_KEY_OTHER_PATH));
 	}
 }

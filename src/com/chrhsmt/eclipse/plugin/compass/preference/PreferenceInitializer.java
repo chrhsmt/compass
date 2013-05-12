@@ -3,7 +3,6 @@ package com.chrhsmt.eclipse.plugin.compass.preference;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
-import org.eclipse.jface.preference.IPreferenceStore;
 
 import com.chrhsmt.eclipse.plugin.compass.Activator;
 
@@ -14,6 +13,8 @@ import com.chrhsmt.eclipse.plugin.compass.Activator;
  */
 public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
+	private static final String EMPTY = "";
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#initializeDefaultPreferences()
 	 */
@@ -21,10 +22,9 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	public void initializeDefaultPreferences() {
 
 		Activator.getDefault().getLog().log(new Status(IStatus.INFO, Activator.PLUGIN_ID, "initialize!!!"));
-		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-		store.setDefault(CompassPreferenceStore.PREF_KEY_RUBY_PATH, "");
-		store.setDefault(CompassPreferenceStore.PREF_KEY_COMPASS_PATH, "compass");
-		store.setDefault(CompassPreferenceStore.PREF_KEY_GEM_PATH, "");
-		store.setDefault(CompassPreferenceStore.PREF_KEY_OTHER_PATH, "");
+		CompassPreferenceStore.setRubyPath(EMPTY);
+		CompassPreferenceStore.setCompassPath("compass");
+		CompassPreferenceStore.setGemBinPath(EMPTY);
+		CompassPreferenceStore.setOtherPath("");
 	}
 }
