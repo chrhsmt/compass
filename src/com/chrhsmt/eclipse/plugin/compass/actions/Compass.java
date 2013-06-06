@@ -194,7 +194,7 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 		@Override
 		public IStatus run(IProgressMonitor monitor) {
 			PluginLogger.log("========= start =========");
-			
+
 			try {
 				ILaunchConfiguration config = this.createConfig();
 				launch = config.launch(ILaunchManager.RUN_MODE, null, false, true);
@@ -245,6 +245,7 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 
 			ILaunchConfigurationWorkingCopy workingCopy = type.newInstance(null, Activator.PLUGIN_ID);
 			workingCopy.setAttribute(IExternalToolConstants.ATTR_LOCATION, location);
+			workingCopy.setAttribute(IExternalToolConstants.ATTR_SHOW_CONSOLE, true);
 			workingCopy.setAttribute(IExternalToolConstants.ATTR_TOOL_ARGUMENTS, arguments);
 			workingCopy.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, CompassPreferenceStore.getPathMap());
 			workingCopy.setAttribute(IExternalToolConstants.ATTR_LAUNCH_IN_BACKGROUND, true);

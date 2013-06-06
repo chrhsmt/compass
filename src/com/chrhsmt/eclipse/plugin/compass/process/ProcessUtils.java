@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.service.environment.Constants;
 
@@ -99,13 +100,13 @@ public class ProcessUtils {
 	 * @return
 	 */
 	public static String getFullPath(String command, Map<String, String> env) {
-		ProcessBuilder builder = new ProcessBuilder(getWhichCommand(command));
-		if (env != null) {
-			builder.environment().putAll(join(builder.environment(), env));
-		}
-		builder.redirectErrorStream(true);
-
 		try {
+			ProcessBuilder builder = new ProcessBuilder(getWhichCommand(command));
+			if (env != null) {
+				builder.environment().putAll(join(builder.environment(), env));
+			}
+			builder.redirectErrorStream(true);
+
 			Process process = builder.start();
 			boolean ret = process.waitFor() == 0;
 			InputStream in = null;
@@ -140,11 +141,12 @@ public class ProcessUtils {
 	 * build which command.
 	 * @param origin
 	 * @return
+	 * @throws IOException 
 	 */
-	private static final String[] getWhichCommand(String origin) {
+    private static final String[] getWhichCommand(String origin) throws IOException {
 		String[] cmd = null;
 		if (ProcessUtils.isWindows()) {
-			cmd = new String[]{ProcessUtils.class.getResource("which.bat").getPath(), origin};
+			cmd = new String[]{FileLocator.resolve(ProcessUtils.class.getResource("which.bat")).getPath(), origin};
 		} else {
 			cmd = new String[]{"which", origin};
 		}
