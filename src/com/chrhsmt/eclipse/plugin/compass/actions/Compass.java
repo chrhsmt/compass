@@ -249,6 +249,10 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 			workingCopy.setAttribute(IExternalToolConstants.ATTR_TOOL_ARGUMENTS, arguments);
 			workingCopy.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, CompassPreferenceStore.getPathMap());
 			workingCopy.setAttribute(IExternalToolConstants.ATTR_LAUNCH_IN_BACKGROUND, true);
+
+			if (ProcessUtils.isWindows()) {
+	 			workingCopy.setAttribute(DebugPlugin.ATTR_CONSOLE_ENCODING, "MS932");
+			}
 			return workingCopy;
 		}
 	}
