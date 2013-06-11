@@ -21,7 +21,33 @@ import com.chrhsmt.eclipse.plugin.compass.preference.CompassPreferenceStore;
  *
  */
 public class ProcessUtils {
-	
+
+	private static final String ONE_LINE_SEPARATOR = ProcessUtils.isWindows() ? " | " : " ; ";
+
+	/**
+	 * Get path variable.
+	 * @return
+	 */
+	public static String getPathVariable() {
+		if (isWindows()) {
+			return "%PATH%";
+		} else {
+			return "$PATH";
+		}
+	}
+
+	/**
+	 * Get path separator.
+	 * @return
+	 */
+	public static String getPathSeparator() {
+		if (isWindows()) {
+			return ";";
+		} else {
+			return ":";
+		}
+	}
+
 	/**
 	 * Get execute command.
 	 * @return
@@ -84,11 +110,17 @@ public class ProcessUtils {
 			command = "compass";
 		}
 		StringBuilder sb = new StringBuilder();
+		boolean first = true;
 		for (IProject project : projects) {
+
+			if (!first) {
+				sb.append(ONE_LINE_SEPARATOR);
+			} else {
+				first = false;
+			}
 			sb.append(command)
 			  .append(" watch ")
-			  .append(project.getLocation().toOSString())
-			  .append(" ; ");
+			  .append(project.getLocation().toOSString());
 		}
 		return sb.toString();
 	}

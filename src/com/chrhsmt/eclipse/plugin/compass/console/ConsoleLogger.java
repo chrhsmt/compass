@@ -56,6 +56,6 @@ public class ConsoleLogger {
 
     public static void output(String consoleName, String message) {
     	ConsoleLogger log = new ConsoleLogger();
-	    log.out(consoleName, message);
+	    log.out(consoleName, new StringBuilder(message).append("\n").toString());
     }
 }
