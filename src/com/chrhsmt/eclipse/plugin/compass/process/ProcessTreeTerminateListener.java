@@ -1,11 +1,10 @@
-package org.eclipse.debug.core.model;
+package com.chrhsmt.eclipse.plugin.compass.process;
 
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
 
 import com.chrhsmt.eclipse.plugin.compass.internal.PluginLogger;
-import com.chrhsmt.eclipse.plugin.compass.process.OSProcess;
 
 /**
  * @author c-hashimoto
