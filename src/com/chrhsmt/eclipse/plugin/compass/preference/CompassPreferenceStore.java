@@ -91,4 +91,24 @@ public class CompassPreferenceStore {
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 		return store.getString(CompassPreferenceStore.PREF_KEY_OTHER_PATH);
 	}
+
+	public static void setRubyDefaultPath(String value) {
+		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		store.setDefault(CompassPreferenceStore.PREF_KEY_RUBY_PATH, value);
+	}
+
+	public static void setCompassDefaultPath(String value) {
+		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		store.setDefault(CompassPreferenceStore.PREF_KEY_COMPASS_PATH, value);
+	}
+
+	public static void setGemBinDefaultPath(String value) {
+		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		store.setDefault(CompassPreferenceStore.PREF_KEY_GEM_BIN_PATH, value);
+	}
+
+	public static void setOtherDefaultPath(String value) {
+		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		store.setDefault(CompassPreferenceStore.PREF_KEY_OTHER_PATH, value);
+	}
 }

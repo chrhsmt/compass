@@ -22,4 +22,11 @@ public class CompassRuntimeProcess extends RuntimeProcess {
 			@SuppressWarnings("rawtypes") Map attributes) {
 		super(launch, process, name, attributes);
 	}
+
+	/**
+	 * 
+	 */
+	public Process getSystemProcess() {
+		return super.getSystemProcess();
+	}
 }
