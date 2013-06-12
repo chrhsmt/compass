@@ -4,6 +4,7 @@ import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
 
+import com.chrhsmt.eclipse.plugin.compass.internal.PluginLogger;
 import com.chrhsmt.eclipse.plugin.compass.process.OSProcess;
 
 /**
@@ -24,8 +25,9 @@ public class ProcessTreeTerminateListener implements IDebugEventSetListener {
 		for (int i = 0; i < events.length; i++) {
 			DebugEvent event = events[i];
 			if (event.getKind() == DebugEvent.TERMINATE) {
-				RuntimeProcess process = (RuntimeProcess) event.getSource();
-				OSProcess.get(process.getSystemProcess()).killRecursively();
+				Object obj = event.getSource();
+				PluginLogger.log(obj.getClass().toString());
+//				OSProcess.get(process.getSystemProcess()).killRecursively();
 				DebugPlugin.getDefault().removeDebugEventListener(this);
 				break;
 			}

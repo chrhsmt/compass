@@ -21,6 +21,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.model.ProcessTreeTerminateListener;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -197,6 +198,7 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 
 			try {
 				ILaunchConfiguration config = this.createConfig();
+				new ProcessTreeTerminateListener().start();
 				launch = config.launch(ILaunchManager.RUN_MODE, null, false, true);
 
 //			try {
