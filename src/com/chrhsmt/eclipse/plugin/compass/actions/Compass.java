@@ -24,10 +24,14 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.IPageListener;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+import org.eclipse.ui.IWorkbenchWindowPulldownDelegate;
 
 import com.chrhsmt.eclipse.plugin.compass.Activator;
 import com.chrhsmt.eclipse.plugin.compass.console.ConsoleLogger;
@@ -46,7 +50,7 @@ import com.chrhsmt.eclipse.plugin.compass.process.ProcessUtils;
  * @see IWorkbenchWindowActionDelegate
  */
 @SuppressWarnings("restriction")
-public class Compass implements IWorkbenchWindowActionDelegate {
+public class Compass implements IWorkbenchWindowPulldownDelegate {
 
 	private static final String CONFIG_FILE_NAME = "config.rb";
 
@@ -260,5 +264,17 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 
 			return workingCopy;
 		}
+	}
+
+	@Override
+	public Menu getMenu(Control parent) {
+		Menu menu = new Menu(parent);
+
+		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+		for (IProject project : root.getProjects()) {
+			if (!project.isOpen()) continue;
+			MenuItem item = new CompassMenuItem(menu, project.getName());
+		}
+		return menu;
 	}
 }

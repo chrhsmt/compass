@@ -21,7 +21,7 @@
                id="com.chrhsmt.eclipse.plugin.compass.actions.compass"
                label="CompassWatch"
                menubarPath="compassMenu/compassGroup"
-               style="toggle"
+               style="pulldown"
                toolbarPath="compassGroup"
                tooltip="compass watch">
 	            <!-- @see IResourceActionFilter -->
