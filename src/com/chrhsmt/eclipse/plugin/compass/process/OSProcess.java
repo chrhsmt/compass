@@ -1,5 +1,7 @@
 package com.chrhsmt.eclipse.plugin.compass.process;
 
+import java.lang.reflect.Field;
+
 import org.jvnet.winp.WinProcess;
 
 /**
@@ -25,6 +27,14 @@ public abstract class OSProcess {
 				}
 			};
 		} else {
+			try {
+				Class<?> clazz = Class.forName("java.lang.UNIXProcess");
+				Field pidFiled = clazz.getDeclaredField("pid");
+				pidFiled.setAccessible(true);
+				Integer pid = (Integer) pidFiled.get(process);
+			} catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
 			return null;
 		}
 	}
