@@ -24,6 +24,9 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -273,7 +276,22 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		for (IProject project : root.getProjects()) {
 			if (!project.isOpen()) continue;
-			MenuItem item = new CompassMenuItem(menu, project.getName());
+			MenuItem item = new MenuItem(menu, SWT.PUSH);
+			item.setText(project.getName());
+			item.setEnabled(true);
+			item.setImage(Activator.getImageDescriptor("icons/compass_icon.png").createImage());
+			item.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					PluginLogger.log("push!!!");
+//					Object data = getData("processed");
+//					if (data == null || (boolean) data == false) {
+//						setData("processed", true);
+//					} else {
+//						setData("processed", false);
+//					}
+				}
+			});
 		}
 		return menu;
 	}
