@@ -70,5 +70,12 @@
             name="CompassLaunchConfigurationType">
       </launchConfigurationType>
    </extension>
+   <extension
+         point="org.eclipse.debug.core.processFactories">
+      <processFactory
+            class="com.chrhsmt.eclipse.plugin.compass.process.ProcessFactory"
+            id="compass.processFactory">
+      </processFactory>
+   </extension>
 
 </plugin>

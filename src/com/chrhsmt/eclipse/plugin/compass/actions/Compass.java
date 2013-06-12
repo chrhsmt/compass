@@ -253,6 +253,9 @@ public class Compass implements IWorkbenchWindowActionDelegate {
 			if (ProcessUtils.isWindows()) {
 	 			workingCopy.setAttribute(DebugPlugin.ATTR_CONSOLE_ENCODING, "MS932");
 			}
+			
+			workingCopy.setAttribute(DebugPlugin.ATTR_PROCESS_FACTORY_ID, "compass.processFactory");
+
 			return workingCopy;
 		}
 	}
