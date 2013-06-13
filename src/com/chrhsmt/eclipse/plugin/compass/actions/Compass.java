@@ -40,7 +40,6 @@ import com.chrhsmt.eclipse.plugin.compass.Activator;
 import com.chrhsmt.eclipse.plugin.compass.console.ConsoleLogger;
 import com.chrhsmt.eclipse.plugin.compass.internal.PluginLogger;
 import com.chrhsmt.eclipse.plugin.compass.preference.CompassPreferenceStore;
-import com.chrhsmt.eclipse.plugin.compass.process.ProcessTreeTerminateListener;
 import com.chrhsmt.eclipse.plugin.compass.process.ProcessUtils;
 
 
@@ -74,6 +73,8 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 	 * The action has been activated. The argument of the
 	 * method represents the 'real' action sitting
 	 * in the workbench UI.
+	 * 
+	 * To use in toggle mode.
 	 * @see IWorkbenchWindowActionDelegate#run
 	 */
 	public void run(IAction action) {
@@ -81,24 +82,34 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 		this.root = ResourcesPlugin.getWorkspace().getRoot();
 
 		if (action.isChecked()) {
-			// start
-			PluginLogger.log("start");
-			
-			this.targetProjects.clear();
-
-			// check config.rb
-			this.checkProjects();
-
-			if (!this.targetProjects.isEmpty()) {
-				Job job = new CompassJob("compass-watch");
-				job.setPriority(Job.LONG);
-				job.setSystem(true); // not reveal for UI.
-				job.schedule();
-			}
-
+			this.startCommand(null);
 		} else {
 			// stop
 			this.stopCommand();
+		}
+	}
+
+	/**
+	 * start.
+	 */
+	private void startCommand(IProject project) {
+		// start
+		PluginLogger.log("start");
+
+		this.targetProjects.clear();
+
+		if (project == null) {
+			// check config.rb
+			this.checkProjects();
+		} else {
+			this.targetProjects.add(project);
+		}
+
+		if (!this.targetProjects.isEmpty()) {
+			Job job = new CompassJob("compass-watch");
+			job.setPriority(Job.LONG);
+			job.setSystem(true); // not reveal for UI.
+			job.schedule();
 		}
 	}
 
@@ -205,7 +216,6 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 
 			try {
 				ILaunchConfiguration config = this.createConfig();
-				new ProcessTreeTerminateListener().start();
 				launch = config.launch(ILaunchManager.RUN_MODE, null, false, true);
 
 //			try {
@@ -274,25 +284,32 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 		Menu menu = new Menu(parent);
 
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		for (IProject project : root.getProjects()) {
+		for (final IProject project : root.getProjects()) {
+
 			if (!project.isOpen()) continue;
+
 			MenuItem item = new MenuItem(menu, SWT.PUSH);
-			item.setText(project.getName());
+
+			final boolean nowOn = this.isStarted(project);
+
+			item.setText(project.getName() + (nowOn ? " - off" : " - on"));
 			item.setEnabled(true);
 			item.setImage(Activator.getImageDescriptor("icons/compass_icon.png").createImage());
 			item.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					PluginLogger.log("push!!!");
-//					Object data = getData("processed");
-//					if (data == null || (boolean) data == false) {
-//						setData("processed", true);
-//					} else {
-//						setData("processed", false);
-//					}
+					if (nowOn) {
+						stopCommand();
+					} else {
+						startCommand(project);
+					}
 				}
 			});
 		}
 		return menu;
+	}
+
+	private boolean isStarted(IProject project) {
+		return this.targetProjects.contains(project);
 	}
 }

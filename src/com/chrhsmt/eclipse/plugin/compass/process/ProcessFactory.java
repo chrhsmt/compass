@@ -21,5 +21,4 @@ public class ProcessFactory implements IProcessFactory {
 			@SuppressWarnings("rawtypes") Map attributes) {
 		return new CompassRuntimeProcess(launch, process, label, attributes);
 	}
-
 }
