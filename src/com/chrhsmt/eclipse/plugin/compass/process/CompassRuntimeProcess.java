@@ -31,6 +31,9 @@ public class CompassRuntimeProcess extends RuntimeProcess {
 		return super.getSystemProcess();
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public void terminate() throws DebugException {
 		OSProcess.get(this.getSystemProcess()).killRecursively();
