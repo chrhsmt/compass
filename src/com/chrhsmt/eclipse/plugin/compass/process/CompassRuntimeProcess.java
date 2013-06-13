@@ -25,14 +25,14 @@ public class CompassRuntimeProcess extends RuntimeProcess {
 	}
 
 	/**
-	 * 
+	 * get system {@link Process}.
 	 */
 	public Process getSystemProcess() {
 		return super.getSystemProcess();
 	}
 
 	/**
-	 * 
+	 * kill recursively and terminate processes.
 	 */
 	@Override
 	public void terminate() throws DebugException {

@@ -70,6 +70,66 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 	}
 
 	/**
+	 * We will cache window object in order to
+	 * be able to provide parent shell for the message dialog.
+	 * @see IWorkbenchWindowActionDelegate#init
+	 */
+	public void init(IWorkbenchWindow window) {
+		PluginLogger.log("init");
+		this.window = window;
+
+		// stop compass process when workbench shutdown.
+		this.window.addPageListener(new IPageListener() {
+			@Override
+			public void pageOpened(IWorkbenchPage page) {
+			}
+			
+			@Override
+			public void pageClosed(IWorkbenchPage page) {
+				stopCommand();
+			}
+			
+			@Override
+			public void pageActivated(IWorkbenchPage page) {
+			}
+		});
+	}
+
+	@Override
+	public Menu getMenu(Control parent) {
+		Menu menu = new Menu(parent);
+
+		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+		for (final IProject project : root.getProjects()) {
+
+			if (!project.isOpen()) continue;
+
+			MenuItem item = new MenuItem(menu, SWT.PUSH);
+
+			final boolean nowOn = this.isStarted(project);
+
+			item.setText(project.getName() + (nowOn ? " - off" : " - on"));
+			item.setEnabled(true);
+			item.setImage(Activator.getImageDescriptor("icons/compass_icon.png").createImage());
+			item.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					if (nowOn) {
+						stopCommand();
+					} else {
+						startCommand(project);
+					}
+				}
+			});
+		}
+		return menu;
+	}
+
+	private boolean isStarted(IProject project) {
+		return this.targetProjects.contains(project);
+	}
+
+	/**
 	 * The action has been activated. The argument of the
 	 * method represents the 'real' action sitting
 	 * in the workbench UI.
@@ -171,32 +231,6 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 	}
 
 	/**
-	 * We will cache window object in order to
-	 * be able to provide parent shell for the message dialog.
-	 * @see IWorkbenchWindowActionDelegate#init
-	 */
-	public void init(IWorkbenchWindow window) {
-		PluginLogger.log("init");
-		this.window = window;
-
-		// stop compass process when workbench shutdown.
-		this.window.addPageListener(new IPageListener() {
-			@Override
-			public void pageOpened(IWorkbenchPage page) {
-			}
-			
-			@Override
-			public void pageClosed(IWorkbenchPage page) {
-				stopCommand();
-			}
-			
-			@Override
-			public void pageActivated(IWorkbenchPage page) {
-			}
-		});
-	}
-
-	/**
 	 * Compass Job.
 	 * @author chihiro
 	 *
@@ -277,39 +311,5 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 
 			return workingCopy;
 		}
-	}
-
-	@Override
-	public Menu getMenu(Control parent) {
-		Menu menu = new Menu(parent);
-
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		for (final IProject project : root.getProjects()) {
-
-			if (!project.isOpen()) continue;
-
-			MenuItem item = new MenuItem(menu, SWT.PUSH);
-
-			final boolean nowOn = this.isStarted(project);
-
-			item.setText(project.getName() + (nowOn ? " - off" : " - on"));
-			item.setEnabled(true);
-			item.setImage(Activator.getImageDescriptor("icons/compass_icon.png").createImage());
-			item.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					if (nowOn) {
-						stopCommand();
-					} else {
-						startCommand(project);
-					}
-				}
-			});
-		}
-		return menu;
-	}
-
-	private boolean isStarted(IProject project) {
-		return this.targetProjects.contains(project);
 	}
 }
