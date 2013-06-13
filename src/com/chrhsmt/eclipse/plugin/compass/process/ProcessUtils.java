@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
@@ -21,8 +20,6 @@ import com.chrhsmt.eclipse.plugin.compass.preference.CompassPreferenceStore;
  *
  */
 public class ProcessUtils {
-
-	private static final String ONE_LINE_SEPARATOR = ProcessUtils.isWindows() ? " | " : " ; ";
 
 	/**
 	 * Get path variable.
@@ -62,15 +59,15 @@ public class ProcessUtils {
 
 	/**
 	 * Get command arguments.
-	 * @param targetProjects
+	 * @param targetProject
 	 * @param pathes
 	 * @return
 	 */
-	public static String getArguments(List<IProject> targetProjects) {
+	public static String getArguments(IProject targetProject) {
 		StringBuilder sb = new StringBuilder()
 		.append(getExecuteCommandOption())
 		.append(" \"")
-		.append(buildExecuteCommandPhrase(targetProjects))
+		.append(buildExecuteCommandPhrase(targetProject))
 		.append("\"");
 		return sb.toString();
 	}
@@ -100,28 +97,19 @@ public class ProcessUtils {
 	}
 
 	/**
-	 * TODO:
-	 * @param projects
+	 * buildExecuteCommandPhrase.
+	 * @param project
 	 * @return
 	 */
-	private static String buildExecuteCommandPhrase(List<IProject> projects) {
+	private static String buildExecuteCommandPhrase(IProject project) {
 		String command = CompassPreferenceStore.getCompassCommand();
 		if (command == null || command.length() <= 0) {
 			command = "compass";
 		}
 		StringBuilder sb = new StringBuilder();
-		boolean first = true;
-		for (IProject project : projects) {
-
-			if (!first) {
-				sb.append(ONE_LINE_SEPARATOR);
-			} else {
-				first = false;
-			}
-			sb.append(command)
-			  .append(" watch ")
-			  .append(project.getLocation().toOSString());
-		}
+		sb.append(command)
+		  .append(" watch ")
+		  .append(project.getLocation().toOSString());
 		return sb.toString();
 	}
 

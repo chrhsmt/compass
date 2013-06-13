@@ -1,7 +1,7 @@
 package com.chrhsmt.eclipse.plugin.compass.actions;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.externaltools.internal.IExternalToolConstants;
 import org.eclipse.core.resources.IFile;
@@ -59,9 +59,7 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 	private IWorkbenchWindow window;
 	private IWorkspaceRoot root;
 	
-	private List<IProject> targetProjects = new ArrayList<IProject>();
-
-	private ILaunch launch;
+	private Map<IProject, ILaunch> targetProjects = new HashMap<IProject, ILaunch>();
 
 	/**
 	 * The constructor.
@@ -86,7 +84,7 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 			
 			@Override
 			public void pageClosed(IWorkbenchPage page) {
-				stopCommand();
+				stopCommand(null);
 			}
 			
 			@Override
@@ -110,14 +108,16 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 
 			item.setText(project.getName() + (nowOn ? " - off" : " - on"));
 			item.setEnabled(true);
+			item.setData(project);
 			item.setImage(Activator.getImageDescriptor("icons/compass_icon.png").createImage());
 			item.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
+					MenuItem item = (MenuItem) e.getSource();
 					if (nowOn) {
-						stopCommand();
+						stopCommand((IProject) item.getData());
 					} else {
-						startCommand(project);
+						startCommand((IProject) item.getData());
 					}
 				}
 			});
@@ -126,7 +126,7 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 	}
 
 	private boolean isStarted(IProject project) {
-		return this.targetProjects.contains(project);
+		return this.targetProjects.containsKey(project);
 	}
 
 	/**
@@ -137,6 +137,7 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 	 * To use in toggle mode.
 	 * @see IWorkbenchWindowActionDelegate#run
 	 */
+	@Deprecated
 	public void run(IAction action) {
 
 		this.root = ResourcesPlugin.getWorkspace().getRoot();
@@ -145,7 +146,7 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 			this.startCommand(null);
 		} else {
 			// stop
-			this.stopCommand();
+			this.stopCommand(null);
 		}
 	}
 
@@ -156,19 +157,13 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 		// start
 		PluginLogger.log("start");
 
-		this.targetProjects.clear();
+		// check config.rb
+		this.checkProjects(project);
 
-		if (project == null) {
-			// check config.rb
-			this.checkProjects();
-		} else {
-			this.targetProjects.add(project);
-		}
-
-		if (!this.targetProjects.isEmpty()) {
-			Job job = new CompassJob("compass-watch");
+		if (this.targetProjects.containsKey(project)) {
+			Job job = new CompassJob("compass-watch", project);
 			job.setPriority(Job.LONG);
-			job.setSystem(true); // not reveal for UI.
+			job.setSystem(true); // to not reveal for UI.
 			job.schedule();
 		}
 	}
@@ -176,22 +171,17 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 	/**
 	 * specify target project.
 	 */
-	private void checkProjects() {
+	private void checkProjects(IProject project) {
 		
-		for (IProject project : this.root.getProjects()) {
-			if (project.exists() && project.isOpen()) {
-				IFile file = project.getFile(CONFIG_FILE_NAME);
-				if (!file.exists() || !file.isAccessible()) {
-					ConsoleLogger.output("compass",
-							String.format("Project '%s' does not have config.rb or read it.", project.getName()));
-					continue;
-				} else {
-					ConsoleLogger.output("compass",
-							String.format("Project '%s' found config.rb.", project.getName()));
-					this.targetProjects.add(project);
-				}
+		if (project.exists() && project.isOpen()) {
+			IFile file = project.getFile(CONFIG_FILE_NAME);
+			if (!file.exists() || !file.isAccessible()) {
+				ConsoleLogger.output("compass",
+						String.format("Project '%s' does not have config.rb or read it.", project.getName()));
 			} else {
-				continue;
+				ConsoleLogger.output("compass",
+						String.format("Project '%s' found config.rb.", project.getName()));
+				this.targetProjects.put(project, null);
 			}
 		}
 	}
@@ -199,15 +189,15 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 	/**
 	 * stop process.
 	 */
-	private void stopCommand() {
-		if (this.launch != null) {
+	private void stopCommand(IProject project) {
+		if (this.targetProjects.containsKey(project)) {
 			try {
-				this.launch.terminate();
+				this.targetProjects.get(project).terminate();
 			} catch (DebugException e) {
 				Activator.getDefault().getLog().log(e.getStatus());
 			}
 		}
-		this.targetProjects.clear();
+		this.targetProjects.remove(project);
 	}
 
 	/**
@@ -227,7 +217,7 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 	 */
 	public void dispose() {
 		PluginLogger.log("dispose");
-		this.stopCommand();
+		this.stopCommand(null);
 	}
 
 	/**
@@ -237,8 +227,11 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 	 */
 	class CompassJob extends Job {
 
-		public CompassJob(String name) {
+		private IProject project;
+
+		public CompassJob(String name, IProject project) {
 			super(name);
+			this.project = project;
 		}
 
 		/* (non-Javadoc)
@@ -248,9 +241,11 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 		public IStatus run(IProgressMonitor monitor) {
 			PluginLogger.log("========= start =========");
 
+			ILaunch launch = null;
 			try {
 				ILaunchConfiguration config = this.createConfig();
 				launch = config.launch(ILaunchManager.RUN_MODE, null, false, true);
+				targetProjects.put(this.project, launch);
 
 //			try {
 //				ILaunchConfigurationType compasstype = manager.getLaunchConfigurationType("com.chrhsmt.eclipse.plugin.compass.CompassLaunchConfigurationType");
@@ -280,6 +275,7 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 						"compass executable command does not exists. please check your path preference.",
 						e.getStatus()
 				);
+				targetProjects.remove(this.project);
 				return e.getStatus();
 			}
 		}
@@ -291,7 +287,7 @@ public class Compass implements IWorkbenchWindowPulldownDelegate {
 		 */
 		private ILaunchConfiguration createConfig() throws CoreException {
 
-			String arguments = ProcessUtils.getArguments(targetProjects);
+			String arguments = ProcessUtils.getArguments(this.project);
 			ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
 			ILaunchConfigurationType type = manager.getLaunchConfigurationType(IExternalToolConstants.ID_PROGRAM_LAUNCH_CONFIGURATION_TYPE);
 			String location = ProcessUtils.getExecuteCommand();
