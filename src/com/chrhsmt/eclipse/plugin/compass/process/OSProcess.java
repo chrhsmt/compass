@@ -1,9 +1,12 @@
 package com.chrhsmt.eclipse.plugin.compass.process;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.List;
 
 import org.jvnet.winp.WinProcess;
+
+import com.chrhsmt.eclipse.plugin.compass.internal.PluginLogger;
 
 /**
  * OS Process class.
@@ -37,13 +40,30 @@ public abstract class OSProcess {
 				Class<?> clazz = Class.forName("java.lang.UNIXProcess");
 				Field pidFiled = clazz.getDeclaredField("pid");
 				pidFiled.setAccessible(true);
-//				Integer pid = (Integer) pidFiled.get(process);
-//				PluginLogger.log("pid:" + pid);
+				final Integer pid = (Integer) pidFiled.get(process);
+				PluginLogger.log("pid:" + pid);
 
-			} catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException e) {
-				e.printStackTrace();
+				return new OSProcess(pid) {
+
+					@Override
+					public void killRecursively() {
+						ProcessBuilder builder = new ProcessBuilder("kill", "-9", pid.toString());
+						try {
+							builder.start();
+						} catch (IOException e) {
+							PluginLogger.log(e.getMessage(), e);
+						}
+					}
+
+					@Override
+					public List<OSProcess> getChildren() {
+						return null;
+					}
+				};
+			} catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+				PluginLogger.log(e.getMessage(), e);
+				return null;
 			}
-			return null;
 		}
 	}
 
