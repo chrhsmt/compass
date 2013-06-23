@@ -22,9 +22,9 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	public void initializeDefaultPreferences() {
 
 		Activator.getDefault().getLog().log(new Status(IStatus.INFO, Activator.PLUGIN_ID, "initialize!!!"));
-		CompassPreferenceStore.setRubyPath(EMPTY);
-		CompassPreferenceStore.setCompassPath("compass");
-		CompassPreferenceStore.setGemBinPath(EMPTY);
-		CompassPreferenceStore.setOtherPath("");
+		CompassPreferenceStore.setRubyDefaultPath(EMPTY);
+		CompassPreferenceStore.setCompassDefaultPath("compass");
+		CompassPreferenceStore.setGemBinDefaultPath(EMPTY);
+		CompassPreferenceStore.setOtherDefaultPath("");
 	}
 }

@@ -4,10 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.service.environment.Constants;
 
@@ -20,7 +20,31 @@ import com.chrhsmt.eclipse.plugin.compass.preference.CompassPreferenceStore;
  *
  */
 public class ProcessUtils {
-	
+
+	/**
+	 * Get path variable.
+	 * @return
+	 */
+	public static String getPathVariable() {
+		if (isWindows()) {
+			return "%PATH%";
+		} else {
+			return "$PATH";
+		}
+	}
+
+	/**
+	 * Get path separator.
+	 * @return
+	 */
+	public static String getPathSeparator() {
+		if (isWindows()) {
+			return ";";
+		} else {
+			return ":";
+		}
+	}
+
 	/**
 	 * Get execute command.
 	 * @return
@@ -35,15 +59,15 @@ public class ProcessUtils {
 
 	/**
 	 * Get command arguments.
-	 * @param targetProjects
+	 * @param targetProject
 	 * @param pathes
 	 * @return
 	 */
-	public static String getArguments(List<IProject> targetProjects) {
+	public static String getArguments(IProject targetProject) {
 		StringBuilder sb = new StringBuilder()
 		.append(getExecuteCommandOption())
 		.append(" \"")
-		.append(buildExecuteCommandPhrase(targetProjects))
+		.append(buildExecuteCommandPhrase(targetProject))
 		.append("\"");
 		return sb.toString();
 	}
@@ -73,22 +97,19 @@ public class ProcessUtils {
 	}
 
 	/**
-	 * TODO:
-	 * @param projects
+	 * buildExecuteCommandPhrase.
+	 * @param project
 	 * @return
 	 */
-	private static String buildExecuteCommandPhrase(List<IProject> projects) {
+	private static String buildExecuteCommandPhrase(IProject project) {
 		String command = CompassPreferenceStore.getCompassCommand();
 		if (command == null || command.length() <= 0) {
 			command = "compass";
 		}
 		StringBuilder sb = new StringBuilder();
-		for (IProject project : projects) {
-			sb.append(command)
-			  .append(" watch ")
-			  .append(project.getLocation().toOSString())
-			  .append(" ; ");
-		}
+		sb.append(command)
+		  .append(" watch ")
+		  .append(project.getLocation().toOSString());
 		return sb.toString();
 	}
 
@@ -99,13 +120,13 @@ public class ProcessUtils {
 	 * @return
 	 */
 	public static String getFullPath(String command, Map<String, String> env) {
-		ProcessBuilder builder = new ProcessBuilder(getWhichCommand(command));
-		if (env != null) {
-			builder.environment().putAll(join(builder.environment(), env));
-		}
-		builder.redirectErrorStream(true);
-
 		try {
+			ProcessBuilder builder = new ProcessBuilder(getWhichCommand(command));
+			if (env != null) {
+				builder.environment().putAll(join(builder.environment(), env));
+			}
+			builder.redirectErrorStream(true);
+
 			Process process = builder.start();
 			boolean ret = process.waitFor() == 0;
 			InputStream in = null;
@@ -140,11 +161,12 @@ public class ProcessUtils {
 	 * build which command.
 	 * @param origin
 	 * @return
+	 * @throws IOException 
 	 */
-	private static final String[] getWhichCommand(String origin) {
+    private static final String[] getWhichCommand(String origin) throws IOException {
 		String[] cmd = null;
 		if (ProcessUtils.isWindows()) {
-			cmd = new String[]{ProcessUtils.class.getResource("which.bat").getPath(), origin};
+			cmd = new String[]{FileLocator.resolve(ProcessUtils.class.getResource("which.bat")).getPath(), origin};
 		} else {
 			cmd = new String[]{"which", origin};
 		}

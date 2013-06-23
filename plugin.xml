@@ -21,7 +21,7 @@
                id="com.chrhsmt.eclipse.plugin.compass.actions.compass"
                label="CompassWatch"
                menubarPath="compassMenu/compassGroup"
-               style="toggle"
+               style="pulldown"
                toolbarPath="compassGroup"
                tooltip="compass watch">
 	            <!-- @see IResourceActionFilter -->
@@ -69,6 +69,13 @@
             modes="run"
             name="CompassLaunchConfigurationType">
       </launchConfigurationType>
+   </extension>
+   <extension
+         point="org.eclipse.debug.core.processFactories">
+      <processFactory
+            class="com.chrhsmt.eclipse.plugin.compass.process.ProcessFactory"
+            id="compass.processFactory">
+      </processFactory>
    </extension>
 
 </plugin>

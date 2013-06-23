@@ -6,6 +6,7 @@ import java.util.Map;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import com.chrhsmt.eclipse.plugin.compass.Activator;
+import com.chrhsmt.eclipse.plugin.compass.process.ProcessUtils;
 
 /**
  * Compass PreferenceStore.
@@ -26,15 +27,15 @@ public class CompassPreferenceStore {
 	public static Map<String, String> getPathMap() {
 		
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-		StringBuilder sb = new StringBuilder("$PATH");
+		StringBuilder sb = new StringBuilder(ProcessUtils.getPathVariable());
 		if (store.getString(PREF_KEY_RUBY_PATH) != null) {
-			sb.append(":").append(store.getString(PREF_KEY_RUBY_PATH));
+			sb.append(ProcessUtils.getPathSeparator()).append(store.getString(PREF_KEY_RUBY_PATH));
 		}
 		if (store.getString(PREF_KEY_GEM_BIN_PATH) != null) {
-			sb.append(":").append(store.getString(PREF_KEY_GEM_BIN_PATH));
+			sb.append(ProcessUtils.getPathSeparator()).append(store.getString(PREF_KEY_GEM_BIN_PATH));
 		}
 		if (store.getString(PREF_KEY_OTHER_PATH) != null) {
-			sb.append(":").append(store.getString(PREF_KEY_OTHER_PATH));
+			sb.append(ProcessUtils.getPathSeparator()).append(store.getString(PREF_KEY_OTHER_PATH));
 		}
 		
 		Map<String, String> map = new HashMap<String, String>();
@@ -89,5 +90,25 @@ public class CompassPreferenceStore {
 	public static String getOtherPath() {
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 		return store.getString(CompassPreferenceStore.PREF_KEY_OTHER_PATH);
+	}
+
+	public static void setRubyDefaultPath(String value) {
+		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		store.setDefault(CompassPreferenceStore.PREF_KEY_RUBY_PATH, value);
+	}
+
+	public static void setCompassDefaultPath(String value) {
+		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		store.setDefault(CompassPreferenceStore.PREF_KEY_COMPASS_PATH, value);
+	}
+
+	public static void setGemBinDefaultPath(String value) {
+		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		store.setDefault(CompassPreferenceStore.PREF_KEY_GEM_BIN_PATH, value);
+	}
+
+	public static void setOtherDefaultPath(String value) {
+		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		store.setDefault(CompassPreferenceStore.PREF_KEY_OTHER_PATH, value);
 	}
 }
